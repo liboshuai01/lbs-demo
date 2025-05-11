@@ -1,0 +1,23 @@
+spring:
+  redis:
+    password: your_password # Redis 主从节点的密码 (如果设置了)
+    timeout: 5000ms      # 连接超时时间
+
+    sentinel:
+      master: mymaster     # Redis 主节点名称 (在 sentinel.conf 中定义的名字)
+      nodes:             # Sentinel 节点的地址列表 (IP:Port)
+        - 47.116.114.234:44801
+        - 139.224.249.155:44801
+        - 47.116.113.67:44801
+        # 只需要提供部分 Sentinel 节点即可，客户端会自动发现其他 Sentinel
+
+    lettuce:
+      pool:
+        min-idle: 0
+        max-idle: 8
+        max-active: 8
+        max-wait: -1ms # 或 -1
+      # lettuce 支持从 sentinel 节点读取数据，可配置读写分离策略
+      # lettuce:
+      #   sentinel:
+      #     read-from: REPLICA_PREFERRED # 例如：优先从副本读

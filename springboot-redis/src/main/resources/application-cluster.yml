@@ -1,0 +1,21 @@
+spring:
+  redis:
+    password: your_cluster_password # Cluster 中所有节点的密码 (如果设置了)
+    timeout: 5000ms              # 连接超时时间
+
+    cluster:
+      nodes:                     # Cluster 节点的地址列表 (IP:Port)
+        - 47.116.114.234:54801
+        - 47.116.114.234:54802
+        - 139.224.249.155:54801
+        # ... 其他节点 ...
+        # 只需要提供部分集群节点即可，客户端会自动发现所有节点和槽分布
+
+      max-redirects: 3           # 处理 MOVED/ASK 重定向的最大次数
+
+    lettuce:
+      pool:
+        min-idle: 0
+        max-idle: 8
+        max-active: 8
+        max-wait: -1ms # 或 -1

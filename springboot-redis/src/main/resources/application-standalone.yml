@@ -1,0 +1,14 @@
+spring:
+  redis:
+    host: 127.0.0.1       # Redis 服务器地址
+    port: 6379           # Redis 服务器端口
+    password: your_password # Redis 访问密码 (如果没有设置，则无需此行或留空)
+    database: 0          # 使用的 Redis 数据库索引 (默认 0)
+    timeout: 5000ms      # 连接超时时间 (单位：毫秒)，建议使用 'ms' 后缀明确单位
+
+    lettuce:
+      pool:
+        min-idle: 0         # 连接池中的最小空闲连接
+        max-idle: 8         # 连接池中的最大空闲连接
+        max-active: 8       # 连接池最大连接数
+        max-wait: -1ms      # 连接池最大阻塞等待时间 (-1 表示无限等待)，建议使用 '-1ms' 或 '-1'

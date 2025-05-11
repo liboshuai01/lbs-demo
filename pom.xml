@@ -10,6 +10,7 @@
   <name>lbs-demo</name>
   <modules>
     <module>maven-multi-env</module>
+      <module>springboot-redis</module>
   </modules>
 
   <properties>
