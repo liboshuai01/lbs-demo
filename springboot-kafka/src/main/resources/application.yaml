@@ -9,7 +9,7 @@ spring:
       buffer-memory: 33554432
     consumer:
       bootstrap-servers: node1:9092,node2:9092,node3:9092
-      group-id: slr_connector
+      group-id: demo_group
       auto-commit-interval: 2000
       auto-offset-reset: latest
       enable-auto-commit: false
