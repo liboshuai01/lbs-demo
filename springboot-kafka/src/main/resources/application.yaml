@@ -1,0 +1,33 @@
+spring:
+  kafka:
+    producer:
+      bootstrap-servers: node1:9092,node2:9092,node3:9092
+      # transaction-id-prefix: starlinkRisk-
+      retries: 3
+      acks: 1
+      batch-size: 32768
+      buffer-memory: 33554432
+    consumer:
+      bootstrap-servers: node1:9092,node2:9092,node3:9092
+      group-id: slr_connector
+      auto-commit-interval: 2000
+      auto-offset-reset: latest
+      enable-auto-commit: false
+      max-poll-records: 3
+    properties:
+      max:
+        poll:
+          interval:
+            ms: 600000
+      session:
+        timeout:
+          ms: 10000
+    listener:
+      concurrency: 9
+      missing-topics-fatal: false
+      poll-timeout: 600000
+
+demo:
+  kafka:
+    provider-topic: demo_provider
+    consumer-topic: demo_consumer

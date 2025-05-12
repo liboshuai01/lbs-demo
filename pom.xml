@@ -11,6 +11,7 @@
   <modules>
     <module>maven-multi-env</module>
       <module>springboot-redis</module>
+      <module>springboot-kafka</module>
   </modules>
 
   <properties>
