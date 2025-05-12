@@ -16,7 +16,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class KafkaDemoController {
 
-    private KafkaEventProvider kafkaEventProvider;
+    private final KafkaEventProvider kafkaEventProvider;
 
     @PostMapping("/send")
     public String sendEvent(@RequestBody KafkaEventDTO kafkaEventDTO){
