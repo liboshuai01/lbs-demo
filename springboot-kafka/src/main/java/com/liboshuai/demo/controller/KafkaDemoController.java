@@ -18,6 +18,12 @@ public class KafkaDemoController {
 
     private KafkaEventProvider kafkaEventProvider;
 
+    @PostMapping("/send")
+    public String sendEvent(@RequestBody KafkaEventDTO kafkaEventDTO){
+        kafkaEventProvider.sendEvent(kafkaEventDTO);
+        return "success";
+    }
+
     @PostMapping("/batchSend")
     public String batchSend(@RequestBody KafkaEventDTO kafkaEventDTO){
         kafkaEventProvider.batchSend(Collections.singletonList(kafkaEventDTO));
