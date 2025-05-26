@@ -34,5 +34,5 @@ spring:
 
 demo:
   kafka:
-    provider-topic: demo_provider_topic     # 生产者Topic名称 (更名以区分)
-    consumer-topic: demo_consumer_topic     # 消费者Topic名称 (更名以区分)
+    provider-topic: demo_topic     # 生产者Topic名称
+    consumer-topic: demo_topic     # 消费者Topic名称
