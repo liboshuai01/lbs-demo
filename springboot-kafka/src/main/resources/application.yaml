@@ -1,7 +1,7 @@
 spring:
   kafka:
     producer:
-      bootstrap-servers: node1:9092,node2:9092,node3:9092 # Kafka集群地址
+      bootstrap-servers: my-kafka-cluster-controller-0.my-kafka-cluster-controller-headless.kafka.svc.cluster.local:9092,my-kafka-cluster-controller-1.my-kafka-cluster-controller-headless.kafka.svc.cluster.local:9092,my-kafka-cluster-controller-2.my-kafka-cluster-controller-headless.kafka.svc.cluster.local:9092 # Kafka集群地址
       # transaction-id-prefix: starlinkRisk- # 事务ID前缀，若启用Kafka事务则配置
       retries: 3                              # 消息发送重试次数，建议>=1以提高可靠性
       acks: all                               # 确认机制: 0, 1, all (-1)。all表示ISR中所有副本确认
@@ -12,7 +12,7 @@ spring:
         compression.type: snappy           # 消息压缩类型: none, gzip, snappy, lz4, zstd
         enable.idempotence: true           # 开启幂等性，配合acks=all, retries>0, max.in.flight.requests.per.connection<=5
     consumer:
-      bootstrap-servers: node1:9092,node2:9092,node3:9092 # Kafka集群地址
+      bootstrap-servers: my-kafka-cluster-controller-0.my-kafka-cluster-controller-headless.kafka.svc.cluster.local:9092,my-kafka-cluster-controller-1.my-kafka-cluster-controller-headless.kafka.svc.cluster.local:9092,my-kafka-cluster-controller-2.my-kafka-cluster-controller-headless.kafka.svc.cluster.local:9092 # Kafka集群地址
       group-id: demo_group                    # 消费者组ID，非常重要
       auto-commit-interval: 2000              # 自动提交间隔 (ms)，当_enable-auto-commit_为true时生效
       auto-offset-reset: latest               # 无初始偏移量或偏移量越界时的策略: latest, earliest, none
