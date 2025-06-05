@@ -12,6 +12,7 @@
     <module>maven-multi-env</module>
       <module>springboot-redis</module>
       <module>springboot-kafka</module>
+    <module>flink-wordcount</module>
   </modules>
 
   <properties>
