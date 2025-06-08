@@ -1,8 +1,8 @@
 spring:
   redis:
-    host: 127.0.0.1       # Redis 服务器地址
+    host: my-redis-standalone-master-0.my-redis-standalone-headless.redis.svc.cluster.local       # Redis 服务器地址
     port: 6379           # Redis 服务器端口
-    password: your_password # Redis 访问密码 (如果没有设置，则无需此行或留空)
+    password: YOUR_PASSWORD # Redis 访问密码 (如果没有设置，则无需此行或留空)
     database: 0          # 使用的 Redis 数据库索引 (默认 0)
     timeout: 5000ms      # 连接超时时间 (单位：毫秒)，建议使用 'ms' 后缀明确单位
 
