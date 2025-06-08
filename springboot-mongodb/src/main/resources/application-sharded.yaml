@@ -5,5 +5,5 @@ spring:
       database: admin
       username: root
       password: YOUR_PASSWORD
-      host: my-mongodb-standalone.mongodb.svc.cluster.local
+      host: my-mongodb-sharded.mongodb.svc.cluster.local
       port: 27017
