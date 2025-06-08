@@ -1,0 +1,6 @@
+spring:
+  data:
+    mongodb:
+      # 使用URI方式连接，这是连接副本集的推荐方式
+      # 它包含了所有节点信息、认证信息以及副本集特定的配置
+      uri: mongodb://root:YOUR_PASSWORD@my-mongodb-replica-0.my-mongodb-replica-headless.mongodb.svc.cluster.local:27017,my-mongodb-replica-1.my-mongodb-replica-headless.mongodb.svc.cluster.local:27017,my-mongodb-replica-2.my-mongodb-replica-headless.mongodb.svc.cluster.local:27017/admin?authSource=admin&replicaSet=rs0
