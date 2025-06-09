@@ -18,14 +18,14 @@ public class RedisDemoController {
     @RequestMapping("/setString")
     public String setString(String key, String value){
         redisTemplate.opsForValue().set(key,value);
-        log.info("设置成功...");
+        log.debug("设置成功...");
         return "设置成功";
     }
 
     @RequestMapping("/getString")
     public String getString(String key){
         String value = (String) redisTemplate.opsForValue().get(key);
-        log.info("查询成功...");
+        log.debug("查询成功...");
         return "返回值: " + value;
     }
 }
