@@ -1,3 +1,6 @@
+server:
+  port: 30005
+
 spring:
   datasource:
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
