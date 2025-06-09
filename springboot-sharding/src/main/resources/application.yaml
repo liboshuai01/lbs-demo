@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:sharding-jdbc.yaml
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        ddl.auto: none
+        generate_statistics: true
+      database-platform: org.hibernate.dialect.MySQL8Dialect
+    open-in-view: false

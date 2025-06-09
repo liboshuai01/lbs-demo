@@ -103,7 +103,7 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <!-- 指定主main类（防止多个main类问题）-->
-                    <mainClass>com.liboshuai.demo.RedisDemoApplication</mainClass>
+                    <mainClass>com.liboshuai.demo.MavenDemoApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>
