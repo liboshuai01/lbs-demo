@@ -2,5 +2,40 @@ server:
   port: 30004
 
 spring:
-  profiles:
-    active: cluster
+  kafka:
+    producer:
+      bootstrap-servers: my-kafka-cluster.kafka.svc.cluster.local:9092 # kafka地址
+      # transaction-id-prefix: starlinkRisk- # 事务ID前缀，若启用Kafka事务则配置
+      retries: 3                              # 消息发送重试次数，建议>=1以提高可靠性
+      acks: all                               # 确认机制: 0, 1, all (-1)。all表示ISR中所有副本确认
+      batch-size: 32768                       # 批量发送大小 (32KB)，根据消息体大小和吞吐量调整
+      buffer-memory: 33554432                 # 生产者缓冲区总大小 (32MB)
+      properties:
+        linger.ms: 5000                    # 消息在缓冲区等待合并发送的最大时间 (ms)，与batch-size配合使用
+        compression.type: snappy           # 消息压缩类型: none, gzip, snappy, lz4, zstd
+        enable.idempotence: true           # 开启幂等性，配合acks=all, retries>0, max.in.flight.requests.per.connection<=5
+    consumer:
+      bootstrap-servers: my-kafka-cluster.kafka.svc.cluster.local:9092 # kafka地址
+      group-id: demo_group                    # 消费者组ID，非常重要
+      auto-commit-interval: 2000              # 自动提交间隔 (ms)，当_enable-auto-commit_为true时生效
+      auto-offset-reset: latest               # 无初始偏移量或偏移量越界时的策略: latest, earliest, none
+      enable-auto-commit: false               # 关闭自动提交，强烈建议手动提交以保证消息处理语义
+      max-poll-records: 50                    # 一次poll拉取的最大记录数，需根据处理能力调整
+      properties:
+        # Spring Boot 2.x 及以下使用 spring.kafka.consumer.properties.max.poll.interval.ms
+        # Spring Boot 3.x 及以上使用 spring.kafka.consumer.properties.max.poll.interval.ms
+        max.poll.interval.ms: 600000        # 消费者两次poll之间的最大间隔 (10分钟)，业务处理时间超过此值会触发Rebalance
+        session.timeout.ms: 30000           # Consumer与Broker的会话超时时间 (30秒)，应小于等于group.max.session.timeout.ms (Broker配置)
+        # heartbeat.interval.ms: 10000        # 心跳间隔，通常为session.timeout.ms的1/3
+        # isolation.level: read_committed    # 事务消费者的隔离级别，仅读取已提交的事务消息
+    listener:
+      concurrency: 9                          # 监听器并发数，建议等于或小于Topic分区数
+      missing-topics-fatal: false             # 监听的主题不存在时是否启动失败，false表示不失败
+      poll-timeout: 5000                      # poll()方法阻塞等待消息的超时时间 (ms)
+      # type: batch                         # 监听器类型: single, batch。如配置为batch，则需使用List<ConsumerRecord>接收
+      # ack-mode: MANUAL_IMMEDIATE          # ACK模式，当enable-auto-commit=false时，推荐MANUAL_IMMEDIATE或MANUAL
+
+demo:
+  kafka:
+    provider-topic: demo_topic     # 生产者Topic名称
+    consumer-topic: demo_topic     # 消费者Topic名称
