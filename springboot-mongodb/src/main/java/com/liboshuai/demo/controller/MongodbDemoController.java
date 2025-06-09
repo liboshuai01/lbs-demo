@@ -1,6 +1,6 @@
 package com.liboshuai.demo.controller;
 
-import com.liboshuai.demo.dao.UserDao;
+import com.liboshuai.demo.entity.UserEntity;
 import com.liboshuai.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class MongodbDemoController {
      * @return 创建成功后的用户对象
      */
     @PostMapping
-    public UserDao createUser(@RequestBody UserDao user) {
+    public UserEntity createUser(@RequestBody UserEntity user) {
         // save() 方法会处理插入操作。如果对象包含id，则会尝试更新。
         // 为确保是创建，可以先将id设为null。
         user.setId(null);
@@ -41,7 +41,7 @@ public class MongodbDemoController {
      * @return 用户列表
      */
     @GetMapping
-    public List<UserDao> getAllUsers() {
+    public List<UserEntity> getAllUsers() {
         return userRepository.findAll();
     }
 
@@ -53,8 +53,8 @@ public class MongodbDemoController {
      * @return 如果找到用户，返回用户信息和200 OK；否则返回404 Not Found。
      */
     @GetMapping("/{id}")
-    public ResponseEntity<UserDao> getUserById(@PathVariable String id) {
-        Optional<UserDao> userOptional = userRepository.findById(id);
+    public ResponseEntity<UserEntity> getUserById(@PathVariable String id) {
+        Optional<UserEntity> userOptional = userRepository.findById(id);
         // 使用ResponseEntity来处理"未找到"的情况，这是REST API的最佳实践
         return userOptional.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -68,7 +68,7 @@ public class MongodbDemoController {
      * @return 匹配的用户列表
      */
     @GetMapping("/by-name")
-    public List<UserDao> getUsersByName(@RequestParam String name) {
+    public List<UserEntity> getUsersByName(@RequestParam String name) {
         return userRepository.findByName(name);
     }
 
@@ -81,13 +81,13 @@ public class MongodbDemoController {
      * @return 如果成功，返回更新后的用户和200 OK；如果用户不存在，返回404 Not Found。
      */
     @PutMapping("/{id}")
-    public ResponseEntity<UserDao> updateUser(@PathVariable String id, @RequestBody UserDao userDetails) {
+    public ResponseEntity<UserEntity> updateUser(@PathVariable String id, @RequestBody UserEntity userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setName(userDetails.getName());
                     user.setAge(userDetails.getAge());
                     user.setGender(userDetails.getGender());
-                    UserDao updatedUser = userRepository.save(user); // save() 方法会识别ID并执行更新
+                    UserEntity updatedUser = userRepository.save(user); // save() 方法会识别ID并执行更新
                     return ResponseEntity.ok(updatedUser);
                 })
                 .orElse(ResponseEntity.notFound().build());

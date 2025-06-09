@@ -1,11 +1,10 @@
 package com.liboshuai.demo.repository;
 
-import com.liboshuai.demo.dao.UserDao;
+import com.liboshuai.demo.entity.UserEntity;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 用户数据访问仓库
@@ -14,7 +13,7 @@ import java.util.Optional;
  * - String: 主键ID的类型
  */
 @Repository
-public interface UserRepository extends MongoRepository<UserDao, String> {
+public interface UserRepository extends MongoRepository<UserEntity, String> {
 
     /**
      * 自定义查询：根据用户名查找用户列表（因为用户名可能不唯一）。
@@ -23,6 +22,6 @@ public interface UserRepository extends MongoRepository<UserDao, String> {
      * @param name 用户名
      * @return 匹配的用户列表
      */
-    List<UserDao> findByName(String name);
+    List<UserEntity> findByName(String name);
 
 }
