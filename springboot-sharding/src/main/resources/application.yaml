@@ -2,9 +2,29 @@ server:
   port: 30005
 
 spring:
-  datasource:
-    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-    url: jdbc:shardingsphere:classpath:sharding-jdbc.yaml
+  shardingsphere:
+    props:
+      sql: #打印代理的sql语句
+        show: true
+    datasource: #配置对应的数据源
+      names: dbmaster,dbslaver1
+      dbmaster:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://my-mysql-replication-primary.mysql.svc.cluster.local:3306/test
+        username: lbs
+        password: YOUR_PASSWORD
+      dbslaver1:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://my-mysql-replication-secondary.mysql.svc.cluster.local:3306/test
+        username: lbs
+        password: YOUR_PASSWORD
+    masterslave: #主从复制的配置，配置读写分离
+      name: ms
+      master-data-source-name: dbmaster #设置主库，写库
+      slave-data-source-names: dbslaver1 #设置从库，读库
+      load-balance-algorithm-type: round_robin #设置从库的负载均衡策略，支持2种：1.轮询 2.随机 random
   jpa:
     show-sql: false
     properties:
