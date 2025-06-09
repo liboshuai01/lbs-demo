@@ -1,6 +1,0 @@
-server:
-  port: 30005
-
-spring:
-  profiles:
-    active: standalone
