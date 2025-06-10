@@ -15,6 +15,7 @@
         <module>flink-wordcount</module>
         <module>springboot-mongodb</module>
         <module>springboot-sharding</module>
+        <module>springboot-mybatisplus</module>
     </modules>
 
     <properties>
