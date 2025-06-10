@@ -9,11 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * MongoDB CRUD 操作演示 Controller
- */
 @RestController
-@RequestMapping("/demo/users") // 使用更具REST风格的复数形式 "users"
+@RequestMapping("/demo/users")
 @RequiredArgsConstructor
 public class MongodbDemoController {
 
