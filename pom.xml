@@ -16,6 +16,7 @@
         <module>springboot-mongodb</module>
         <module>springboot-sharding</module>
         <module>springboot-mybatisplus</module>
+        <module>springboot-mybatisplus-dynamic</module>
     </modules>
 
     <properties>

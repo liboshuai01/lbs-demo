@@ -1,0 +1,40 @@
+server:
+  port: 30007
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*Mapper.xml
+  global-config:
+    banner: true
+    db-config:
+      id-type: auto
+      where-strategy: not_empty
+      insert-strategy: not_empty
+      update-strategy: not_null
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+    jdbc-type-for-null: 'null'
+    call-setters-on-nulls: true
+    shrink-whitespaces-in-sql: true
+
+spring:
+  datasource:
+    dynamic:
+      primary: master
+      strict: false
+      datasource:
+        master:
+          url: jdbc:mysql://test:3301/test?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true # MySQL Connector/J 8.X 连接的示例
+          username: root
+          password: YOUR_PASSWORD
+          driver-class-name: com.mysql.jdbc.Driver
+        slave_1:
+          url: jdbc:mysql://test:3302/test?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&nullCatalogMeansCurrent=true
+          username: root
+          password: YOUR_PASSWORD
+          driver-class-name: com.mysql.jdbc.Driver
+        slave_2:
+          url: jdbc:mysql://test:3303/test?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&nullCatalogMeansCurrent=true
+          username: root
+          password: YOUR_PASSWORD
+          driver-class-name: com.mysql.jdbc.Driver
