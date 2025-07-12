@@ -3,7 +3,10 @@ package com.liboshuai.demo;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
+import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.util.Collector;
@@ -28,10 +31,11 @@ public class FlinkWordCountDemo {
     public static void main(String[] args) throws Exception {
         // 1. 设置执行环境
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        // 为了演示方便，这里设置为单并行度。在生产环境中，建议移除此行，让 Flink 自动管理或通过配置指定。
-        env.setParallelism(1);
 
-        // 2. 使用 ParameterTool 解析命令行参数
+        // 2. 设置 checkpoint
+        setCheckpoint(env);
+
+        // 3. 使用 ParameterTool 解析命令行参数
         // 示例: --hostname my-host --port 12345
         final ParameterTool params = ParameterTool.fromArgs(args);
 
@@ -40,8 +44,34 @@ public class FlinkWordCountDemo {
             LOG.warn("未提供任何命令行参数，将使用默认主机与端口: {}:{}", DEFAULT_HOSTNAME, DEFAULT_PORT);
         }
 
-        // 3. 构建并执行 Flink 作业
+        // 4. 构建并执行 Flink 作业
         buildAndExecuteJob(env, params);
+    }
+
+    /**
+     * 设置 Flink 的 checkpoint 配置
+     */
+    private static void setCheckpoint(StreamExecutionEnvironment env) {
+        // 启用 checkpoint，并设置时间间隔
+        env.enableCheckpointing(10000);
+        CheckpointConfig checkpointConfig = env.getCheckpointConfig();
+        // 两次 checkpoint 之间最少间隔时间
+        checkpointConfig.setMinPauseBetweenCheckpoints(10000);
+        // checkpoint 超时时间
+        checkpointConfig.setCheckpointTimeout(10000);
+        // 作业手动取消时，保留 checkpoint 数据（需手动清理）
+        checkpointConfig.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        // checkpoint 语义
+        checkpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        // 最多允许 checkpoint 失败次数
+        checkpointConfig.setTolerableCheckpointFailureNumber(3);
+        // 同一时间只允许一个 checkpoint 进行
+        checkpointConfig.setMaxConcurrentCheckpoints(1);
+        // 设置 checkpoint 存储位置
+        checkpointConfig.setCheckpointStorage("file:///opt/flink/checkpoints");
+//        checkpointConfig.setCheckpointStorage("file:///C:/Me/Temp/flink/checkpoint");
+        // 设置状态后端
+        env.setStateBackend(new HashMapStateBackend());
     }
 
     /**
