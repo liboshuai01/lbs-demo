@@ -25,12 +25,14 @@
 
     <distributionManagement>
         <repository>
-            <id>maven-releases</id>
-            <url>http://nexus.lbs.com/repository/maven-releases/</url>
+            <id>lbs-releases</id>
+            <name>Nexus Release Repository</name>
+            <url>http://master:18081/repository/lbs-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>maven-snapshots</id>
-            <url>http://nexus.lbs.com/repository/maven-snapshots/</url>
+            <id>lbs-snapshots</id>
+            <name>Nexus Snapshot Repository</name>
+            <url>http://master:18081/repository/lbs-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 </project>
