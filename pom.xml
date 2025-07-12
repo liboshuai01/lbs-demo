@@ -22,16 +22,16 @@
     </modules>
 
     <!-- 发布管理，定义项目发布到远程仓库的配置 -->
-    <distributionManagement>
-        <repository>
-            <id>lbs-releases</id> <!-- 发布版库的ID，需与settings.xml中的server ID对应 -->
-            <name>Nexus Release Repository</name>
-            <url>http://nexus.lbs.com/repository/lbs-releases/</url> <!-- 发布版库地址 -->
-        </repository>
-        <snapshotRepository>
-            <id>lbs-snapshots</id> <!-- 快照版库的ID，需与settings.xml中的server ID对应 -->
-            <name>Nexus Snapshot Repository</name>
-            <url>http://nexus.lbs.com/repository/lbs-snapshots/</url> <!-- 快照版库地址 -->
-        </snapshotRepository>
-    </distributionManagement>
+<!--    <distributionManagement>-->
+<!--        <repository>-->
+<!--            <id>lbs-releases</id> &lt;!&ndash; 发布版库的ID，需与settings.xml中的server ID对应 &ndash;&gt;-->
+<!--            <name>Nexus Release Repository</name>-->
+<!--            <url>http://nexus.lbs.com/repository/lbs-releases/</url> &lt;!&ndash; 发布版库地址 &ndash;&gt;-->
+<!--        </repository>-->
+<!--        <snapshotRepository>-->
+<!--            <id>lbs-snapshots</id> &lt;!&ndash; 快照版库的ID，需与settings.xml中的server ID对应 &ndash;&gt;-->
+<!--            <name>Nexus Snapshot Repository</name>-->
+<!--            <url>http://nexus.lbs.com/repository/lbs-snapshots/</url> &lt;!&ndash; 快照版库地址 &ndash;&gt;-->
+<!--        </snapshotRepository>-->
+<!--    </distributionManagement>-->
 </project>
