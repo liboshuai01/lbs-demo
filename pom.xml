@@ -2,12 +2,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.liboshuai.demo</groupId>
-    <artifactId>lbs-demo</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <!-- 项目基本信息 -->
+    <groupId>com.liboshuai.demo</groupId> <!-- 组织或公司ID -->
+    <artifactId>lbs-demo</artifactId> <!-- 项目ID -->
+    <version>0.1.0-SNAPSHOT</version> <!-- 项目版本，SNAPSHOT表示开发中版本 -->
+    <packaging>pom</packaging> <!-- 项目打包类型，pom表示聚合项目 -->
 
-    <name>lbs-demo</name>
+    <name>lbs-demo</name> <!-- 项目名称 -->
+    <!-- 聚合模块列表（多模块项目） -->
     <modules>
         <module>maven-multi-env</module>
         <module>springboot-redis</module>
@@ -19,20 +21,17 @@
         <module>springboot-mybatisplus-dynamic</module>
     </modules>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
+    <!-- 发布管理，定义项目发布到远程仓库的配置 -->
 <!--    <distributionManagement>-->
 <!--        <repository>-->
-<!--            <id>lbs-releases</id>-->
+<!--            <id>lbs-releases</id> &lt;!&ndash; 发布版库的ID，需与settings.xml中的server ID对应 &ndash;&gt;-->
 <!--            <name>Nexus Release Repository</name>-->
-<!--            <url>http://master:18081/repository/lbs-releases/</url>-->
+<!--            <url>http://master:18081/repository/lbs-releases/</url> &lt;!&ndash; 发布版库地址 &ndash;&gt;-->
 <!--        </repository>-->
 <!--        <snapshotRepository>-->
-<!--            <id>lbs-snapshots</id>-->
+<!--            <id>lbs-snapshots</id> &lt;!&ndash; 快照版库的ID，需与settings.xml中的server ID对应 &ndash;&gt;-->
 <!--            <name>Nexus Snapshot Repository</name>-->
-<!--            <url>http://master:18081/repository/lbs-snapshots/</url>-->
+<!--            <url>http://master:18081/repository/lbs-snapshots/</url> &lt;!&ndash; 快照版库地址 &ndash;&gt;-->
 <!--        </snapshotRepository>-->
 <!--    </distributionManagement>-->
 </project>
