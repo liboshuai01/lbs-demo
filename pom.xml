@@ -23,16 +23,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>lbs-releases</id>
-            <name>Nexus Release Repository</name>
-            <url>http://master:18081/repository/lbs-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>lbs-snapshots</id>
-            <name>Nexus Snapshot Repository</name>
-            <url>http://master:18081/repository/lbs-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+<!--    <distributionManagement>-->
+<!--        <repository>-->
+<!--            <id>lbs-releases</id>-->
+<!--            <name>Nexus Release Repository</name>-->
+<!--            <url>http://master:18081/repository/lbs-releases/</url>-->
+<!--        </repository>-->
+<!--        <snapshotRepository>-->
+<!--            <id>lbs-snapshots</id>-->
+<!--            <name>Nexus Snapshot Repository</name>-->
+<!--            <url>http://master:18081/repository/lbs-snapshots/</url>-->
+<!--        </snapshotRepository>-->
+<!--    </distributionManagement>-->
 </project>
