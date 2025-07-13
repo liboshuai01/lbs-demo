@@ -1,35 +1,48 @@
-## 模块概览
+# lbs-demo: Java 技术栈演示集合
 
-本项目包含以下主要模块：
+本项目是一个包含了多个独立模块的集合，旨在演示如何在 Java 和 Spring Boot 环境中集成和使用各种流行的后端技术和框架。每个子目录都是一个功能齐全、可独立运行的 Maven 项目。
 
-1.  **`maven-multi-env`**
-    *   **说明:** Spring Boot 项目使用 Maven 进行多环境（如开发、测试、生产）配置的示例。演示如何通过 Maven Profile 和 Spring Boot 的 `application.properties`/`application.yml` 文件来实现不同环境的配置切换。
+## 项目结构
 
-2.  **`springboot-kafka`**
-    *   **说明:** Spring Boot 整合 Apache Kafka 的示例。演示了 Spring Boot 如何作为 Kafka 的生产者（Producer）发送消息和作为消费者（Consumer）接收消息。
-
-3.  **`springboot-redis`**
-    *   **说明:** Spring Boot 整合 Redis 的示例。涵盖了连接和操作 Redis 单体 (Standalone)、哨兵 (Sentinel) 和集群 (Cluster) 模式。展示了 Spring Data Redis 的常见用法。
-
-## 技术栈
-
-*   后端框架: Spring Boot
-*   构建工具: Maven
-*   消息队列: Apache Kafka
-*   缓存/数据结构存储: Redis (Standalone, Sentinel, Cluster)
-*   编程语言: Java
+- **`flink-wordcount`**: 使用 Apache Flink 实现的经典单词计数批处理任务。
+- **`maven-multi-env`**: 演示如何使用 Maven Profiles 和 Spring Profiles 为 Spring Boot 应用配置多套不同的环境（如 dev, uat, prod）。
+- **`springboot-kafka`**: 整合 Spring Boot 与 Apache Kafka，实现了消息的生产和消费。
+- **`springboot-mongodb`**: 整合 Spring Boot 与 MongoDB，并提供了在不同部署模式（单机、副本集、分片集群）下的配置示例。
+- **`springboot-mybatisplus`**: 整合 Spring Boot 与 Mybatis-Plus，展示了如何使用这个强大的 ORM 框架简化数据库操作。
+- **`springboot-mybatisplus-dynamic`**: 在 Mybatis-Plus 的基础上，实现了动态数据源的切换功能。
+- **`springboot-redis`**: 整合 Spring Boot 与 Redis，并提供了在不同部署模式（单机、哨兵、集群）下的配置示例。
+- **`springboot-sharding`**: 整合 Spring Boot 与 ShardingSphere-JDBC，演示了数据库分库分表的实现。
 
 ## 环境要求
 
-*   JDK 8 或更高版本
-*   Maven 3.x 或更高版本
-*   根据需要运行 Kafka 和 ZooKeeper 服务 (用于 `springboot-kafka` 模块)
-*   根据需要运行 Redis 服务 (单体、哨兵、集群) (用于 `springboot-redis` 模块)
+在开始之前，请确保您已安装好以下软件：
 
-## 构建项目
+- JDK 1.8+
+- Maven 3.5+
+- (可选) Docker，用于快速部署 MySQL, Redis, MongoDB, Kafka 等中间件。
 
-在项目根目录 (`lbs-demo`) 执行以下 Maven 命令：
+## 快速开始
 
-```bash
-mvn clean install -Dmaven.test.skip=true
-```
+1.  **克隆项目**
+    ```bash
+    git clone <your-repository-url>
+    cd lbs-demo
+    ```
+
+2.  **构建整个项目**
+    在项目根目录下执行以下命令，编译并打包所有模块：
+    ```bash
+    mvn clean install
+    ```
+
+3.  **运行指定模块**
+    进入您想运行的模块目录，然后使用 `spring-boot:run` 命令启动。例如，启动 `springboot-kafka` 模块：
+    ```bash
+    cd springboot-kafka
+    mvn spring-boot:run
+    ```
+    每个模块的具体配置（如数据库连接、Kafka地址等）请参考其 `src/main/resources` 下的 `application.yml` 或 `application.yaml` 文件。
+
+## 许可证
+
+本项目遵循 [LICENSE](LICENSE) 文件中的许可协议。
