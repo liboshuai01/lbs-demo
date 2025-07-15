@@ -72,7 +72,7 @@ public class FlinkWordCountDemo {
         checkpointConfig.setTolerableCheckpointFailureNumber(3);
         // 同一时间只允许一个 checkpoint 进行
         checkpointConfig.setMaxConcurrentCheckpoints(1);
-        // 设置 checkpoint 存储位置
+        // 设置 checkpoint 存储位置（要与 flink on k8s 挂载的pvc目录路径一致）
         checkpointConfig.setCheckpointStorage("file:///opt/flink/checkpoints");
 //        checkpointConfig.setCheckpointStorage("file:///C:/Me/Temp/flink/checkpoint");
         // 设置状态后端
