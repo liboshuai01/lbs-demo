@@ -81,14 +81,16 @@ public class FlinkWordCountDemo {
 
     /**
      * 构建 Flink 数据处理管道并执行。
-     * @param env Flink 流执行环境
+     *
+     * @param env    Flink 流执行环境
      * @param params 命令行参数工具
      */
     private static void buildAndExecuteJob(StreamExecutionEnvironment env, ParameterTool params) throws Exception {
         String hostname = params.get(KEY_HOSTNAME, DEFAULT_HOSTNAME);
         int port = params.getInt(KEY_PORT, DEFAULT_PORT);
+        int parallelism = params.getInt(PARALLELISM, DEFAULT_PARALLELISM);
 
-        LOG.info("开始构建 Flink 作业，数据源 Socket: {}:{}", hostname, port);
+        LOG.info("开始构建 Flink 作业，数据源 Socket: {}:{}，并行度: {}", hostname, port, parallelism);
 
         // 4. 创建数据源：从 Socket 读取文本流
         DataStream<String> textStream = env.socketTextStream(hostname, port)
@@ -123,6 +125,7 @@ public class FlinkWordCountDemo {
 
     /**
      * 自定义的 SinkFunction，用于将数据流中的每个元素通过 SLF4J/Log4j2 打印出来。
+     *
      * @param <T> 数据类型
      */
     public static class LogPrintSink<T> implements SinkFunction<T> {
