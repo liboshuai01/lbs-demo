@@ -23,26 +23,27 @@ public class FlinkWordCountDemo {
     // 定义参数键
     private static final String KEY_HOSTNAME = "hostname";
     private static final String KEY_PORT = "port";
+    private static final String PARALLELISM = "parallelism";
 
     // 定义默认值
     private static final String DEFAULT_HOSTNAME = "localhost";
     private static final int DEFAULT_PORT = 9999;
+    private static final int DEFAULT_PARALLELISM = 1;
 
     public static void main(String[] args) throws Exception {
         // 1. 设置执行环境
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        // 2. 设置 checkpoint
-        setCheckpoint(env);
-
-        // 3. 使用 ParameterTool 解析命令行参数
+        // 2. 使用 ParameterTool 解析命令行参数
         // 示例: --hostname my-host --port 12345
         final ParameterTool params = ParameterTool.fromArgs(args);
-
         // 检查是否提供了必要的参数，并提供友好的提示
         if (args.length == 0) {
-            LOG.warn("未提供任何命令行参数，将使用默认主机与端口: {}:{}", DEFAULT_HOSTNAME, DEFAULT_PORT);
+            LOG.warn("未提供任何命令行参数，将使用默认主机、端口、并行度: {}:{}:{}", DEFAULT_HOSTNAME, DEFAULT_PORT, DEFAULT_PARALLELISM);
         }
+
+        // 3. 设置 flink 配置
+        setConfig(env, params);
 
         // 4. 构建并执行 Flink 作业
         buildAndExecuteJob(env, params);
@@ -51,7 +52,11 @@ public class FlinkWordCountDemo {
     /**
      * 设置 Flink 的 checkpoint 配置
      */
-    private static void setCheckpoint(StreamExecutionEnvironment env) {
+    private static void setConfig(StreamExecutionEnvironment env, ParameterTool params) {
+        // 设置全局并行度
+        int parallelism = params.getInt(PARALLELISM, DEFAULT_PARALLELISM);
+        env.setParallelism(parallelism);
+
         // 启用 checkpoint，并设置时间间隔
         env.enableCheckpointing(10000);
         CheckpointConfig checkpointConfig = env.getCheckpointConfig();
