@@ -19,5 +19,6 @@
         <module>springboot-sharding</module>
         <module>springboot-mybatisplus</module>
         <module>springboot-mybatisplus-dynamic</module>
+        <module>hexo2wiki-tool</module>
     </modules>
 </project>
