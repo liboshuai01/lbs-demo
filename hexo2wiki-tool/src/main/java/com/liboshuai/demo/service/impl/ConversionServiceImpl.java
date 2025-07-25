@@ -16,8 +16,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,18 +28,19 @@ import java.util.stream.Stream;
 @Service
 public class ConversionServiceImpl implements ConversionService {
 
-    private static final DateTimeFormatter HEXO_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    // --- 日期格式化器 ---
+    // 用于 wiki.js 输出格式: 2025-07-25T19:13:28.147Z
     private static final DateTimeFormatter WIKI_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
-    /**
-     * 处理指定目录下的所有Markdown文件，并输出到目标目录
-     *
-     * @param sourceDirectoryPath 源目录路径
-     * @param targetDirectoryPath 目标目录路径
-     * @return 处理的文件数量
-     * @throws IOException 如果发生IO错误
-     */
+    // 用于解析 "Thu Dec 08 07:43:18 CST 2022" 格式
+    private static final DateTimeFormatter GIT_COMMIT_DATE_FORMATTER = DateTimeFormatter.ofPattern("E MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+
+    // 用于解析 "2024-08-20 10:36:39" 格式
+    private static final DateTimeFormatter HEXO_SIMPLE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+
     public long processDirectory(String sourceDirectoryPath, String targetDirectoryPath) throws IOException {
+        // 此方法与之前版本保持不变
         Path sourceRoot = Paths.get(sourceDirectoryPath);
         Path targetRoot = Paths.get(targetDirectoryPath);
 
@@ -45,7 +48,6 @@ public class ConversionServiceImpl implements ConversionService {
             throw new IllegalArgumentException("提供的源路径不是一个有效的目录: " + sourceDirectoryPath);
         }
 
-        // 自动创建目标目录（如果不存在）
         Files.createDirectories(targetRoot);
         log.info("目标目录已确保存在: {}", targetRoot);
 
@@ -55,7 +57,7 @@ public class ConversionServiceImpl implements ConversionService {
                     .filter(path -> path.toString().toLowerCase().endsWith(".md"))
                     .collect(Collectors.toList());
 
-            log.info("找到 {} 个Markdown文件待处理。", markdownFiles.size());
+            log.info("找到 {} 个 Markdown 文件待处理。", markdownFiles.size());
 
             long count = 0;
             for (Path sourceFile : markdownFiles) {
@@ -64,30 +66,21 @@ public class ConversionServiceImpl implements ConversionService {
                         count++;
                     }
                 } catch (Exception e) {
-                    log.error("转换文件失败: {}", sourceFile, e);
+                    log.error("文件转换失败: {}", sourceFile, e);
                 }
             }
             return count;
         }
     }
 
-    /**
-     * 转换单个文件并保存到目标位置
-     *
-     * @param sourceFile 源文件路径
-     * @param sourceRoot 源根目录
-     * @param targetRoot 目标根目录
-     * @return 如果成功转换则返回true
-     * @throws IOException 如果发生IO错误
-     */
     private boolean convertAndSaveFile(Path sourceFile, Path sourceRoot, Path targetRoot) throws IOException {
         log.debug("正在处理源文件: {}", sourceFile);
 
-        // --- 1. 读取和解析源文件 ---
+        // --- 1. 读取和解析源文件 (未修改) ---
         List<String> lines = Files.readAllLines(sourceFile, StandardCharsets.UTF_8);
 
         if (lines.size() < 2 || !lines.get(0).trim().equals("---")) {
-            log.warn("跳过文件，因为它似乎没有一个有效的前置元数据块: {}", sourceFile);
+            log.warn("跳过文件，因为它似乎没有有效的前置元数据块: {}", sourceFile);
             return false;
         }
         int secondDashIndex = -1;
@@ -110,18 +103,18 @@ public class ConversionServiceImpl implements ConversionService {
         try {
             hexoData = yaml.load(hexoYamlContent);
             if (hexoData == null) {
-                log.warn("跳过具有空前置元数据的文件: {}", sourceFile);
+                log.warn("跳过文件，前置元数据为空: {}", sourceFile);
                 return false;
             }
         } catch (Exception e) {
-            log.error("解析文件前置元数据失败: {}. 错误: {}", sourceFile, e.getMessage());
+            log.error("解析文件的前置 YAML 元数据失败: {}. 错误: {}", sourceFile, e.getMessage());
             return false;
         }
 
-        // --- 2. 应用转换规则 ---
+        // --- 2. 应用转换规则 (修改部分) ---
         String title = (String) hexoData.get("title");
         if (title == null || title.trim().isEmpty()) {
-            log.warn("由于缺少标题，跳过文件: {}", sourceFile);
+            log.warn("跳过文件，缺少标题: {}", sourceFile);
             return false;
         }
 
@@ -130,18 +123,45 @@ public class ConversionServiceImpl implements ConversionService {
         wikiData.put("description", title);
         wikiData.put("published", true);
 
+        // === 日期处理修改开始 ===
         Object hexoDateObj = hexoData.get("date");
         if (hexoDateObj != null) {
-            try {
-                LocalDateTime localDateTime = LocalDateTime.parse(hexoDateObj.toString(), HEXO_DATE_FORMATTER);
-                ZonedDateTime utcDateTime = localDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC"));
-                String wikiDateString = utcDateTime.format(WIKI_DATE_FORMATTER);
+            ZonedDateTime zonedDateTime = null;
+
+            // 1. 检查 snakeyaml 是否已将其转换为 Date 对象
+            if (hexoDateObj instanceof Date) {
+                log.debug("文件 {} 中的日期是 java.util.Date 类型，直接转换。", sourceFile.getFileName());
+                zonedDateTime = ((Date) hexoDateObj).toInstant().atZone(ZoneId.of("UTC"));
+            }
+            // 2. 如果不是，则将其视为字符串并尝试解析已知格式
+            else if (hexoDateObj instanceof String) {
+                String dateString = (String) hexoDateObj;
+                log.debug("文件 {} 中的日期是字符串: '{}'. 尝试解析。", sourceFile.getFileName(), dateString);
+                try {
+                    // 首先尝试解析 "Thu Dec 08 07:43:18 CST 2022" 格式
+                    zonedDateTime = ZonedDateTime.parse(dateString, GIT_COMMIT_DATE_FORMATTER);
+                } catch (DateTimeParseException e1) {
+                    try {
+                        // 如果失败，尝试解析 "2024-08-20 10:36:39" 格式
+                        LocalDateTime localDateTime = LocalDateTime.parse(dateString, HEXO_SIMPLE_DATE_FORMATTER);
+                        // 对于这种简单格式，假设使用系统默认时区
+                        zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
+                    } catch (DateTimeParseException e2) {
+                        log.warn("无法使用任何已知格式解析文件 {} 中的日期字符串 '{}'。跳过日期转换。", dateString, sourceFile);
+                    }
+                }
+            }
+
+            // 如果解析成功，则将其格式化为 wiki.js 格式
+            if (zonedDateTime != null) {
+                // 确保最终时间为 UTC，然后格式化为 ISO 8601 字符串
+                String wikiDateString = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC")).format(WIKI_DATE_FORMATTER);
                 wikiData.put("date", wikiDateString);
                 wikiData.put("dateCreated", wikiDateString);
-            } catch (DateTimeParseException e) {
-                log.warn("无法解析文件 {} 中的日期 '{}'。跳过日期转换。", hexoDateObj, sourceFile);
+                log.debug("成功转换文件 {} 的日期。", sourceFile.getFileName());
             }
         }
+        // === 日期处理修改结束 ===
 
         Object categoriesObj = hexoData.get("categories");
         if (categoriesObj instanceof List && !((List<?>) categoriesObj).isEmpty()) {
@@ -150,21 +170,17 @@ public class ConversionServiceImpl implements ConversionService {
 
         wikiData.put("editor", "markdown");
 
-        // --- 3. 生成新内容并写入目标文件 ---
+        // --- 3. 生成新内容并写入目标文件 (未修改) ---
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         options.setPrettyFlow(true);
         String wikiYamlContent = new Yaml(options).dump(wikiData);
         String newFileContent = "---\n" + wikiYamlContent + "---\n" + bodyContent;
 
-        // 计算目标文件路径，保持目录结构
         Path relativePath = sourceRoot.relativize(sourceFile);
         Path targetFile = targetRoot.resolve(relativePath);
 
-        // 确保目标文件的父目录存在
         Files.createDirectories(targetFile.getParent());
-
-        // 写入新文件到目标路径
         Files.write(targetFile, newFileContent.getBytes(StandardCharsets.UTF_8));
         log.info("成功转换 [{}] -> [{}]", sourceFile, targetFile);
         return true;
