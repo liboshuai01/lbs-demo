@@ -3,9 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.liboshuai.demo</groupId>
-        <artifactId>lbs-demo</artifactId>
+        <artifactId>flink-rpc</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>base-pekko-1</artifactId>
