@@ -21,5 +21,6 @@
         <module>springboot-mybatisplus-dynamic</module>
         <module>hexo2wiki-tool</module>
         <module>flink-rpc</module>
+        <module>flink-rpc/base-pekko-1</module>
     </modules>
 </project>

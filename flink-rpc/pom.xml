@@ -12,7 +12,6 @@
 
     <name>flink-rpc</name>
     <modules>
-        <module>flink-rpc-base-pekko</module>
     </modules>
 
 </project>
