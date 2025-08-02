@@ -8,6 +8,8 @@ import org.apache.pekko.actor.ActorSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 public class ClientSystemMain {
 
     private static final Logger log = LoggerFactory.getLogger(ClientSystemMain.class);
@@ -31,13 +33,11 @@ public class ClientSystemMain {
 
         log.info(">>> 按回车键退出 <<<");
         try {
-            System.in.read();
-        } catch (Exception e) {
-            // 在实际应用中，这里也应该使用日志
-            e.printStackTrace();
+            int ignored = System.in.read();
+        } catch (IOException e) {
+            log.error("等待输入时发生错误。", e);
         } finally {
             system.terminate();
-            log.info("客户端系统已终止。");
         }
     }
 }
