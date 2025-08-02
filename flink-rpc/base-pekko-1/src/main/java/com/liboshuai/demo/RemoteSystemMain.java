@@ -8,6 +8,8 @@ import org.apache.pekko.actor.ActorSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 public class RemoteSystemMain {
 
     private static final Logger log = LoggerFactory.getLogger(RemoteSystemMain.class);
@@ -23,9 +25,9 @@ public class RemoteSystemMain {
 
         log.info(">>> 按回车键退出 <<<");
         try {
-            System.in.read();
-        } catch (Exception e) {
-            e.printStackTrace();
+            int ignored = System.in.read();
+        } catch (IOException e) {
+            log.error("等待输入时发生错误。", e);
         } finally {
             system.terminate();
         }
