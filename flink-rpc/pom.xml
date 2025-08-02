@@ -12,6 +12,7 @@
 
     <name>flink-rpc</name>
     <modules>
+        <module>bash-pekko-2</module>
     </modules>
 
 </project>
