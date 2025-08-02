@@ -14,11 +14,11 @@ import java.io.InputStreamReader;
 public class ClientMain {
     public static void main(String[] args) {
         Config config = ConfigFactory.parseString(
-                "pekko.remote.artery.canonical.port = 25531"
+                "pekko.remote.artery.canonical.port = 25521"
         ).withFallback(ConfigFactory.load());
         ActorSystem clientSystem = ActorSystem.create("clientSystem", config);
 
-        String serverPath = "pekko://serverSystem@127.0.0.1:25530/user/serverActor";
+        String serverPath = "pekko://serverSystem@127.0.0.1:25520/user/serverActor";
         ActorRef clientActor = clientSystem.actorOf(ClientActor.props(serverPath), "clientActor");
 
         log.info("客户端 actor 已经创建完毕，完整路径为: {}", clientActor.path());
