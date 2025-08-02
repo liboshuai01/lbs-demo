@@ -16,7 +16,7 @@ public class ClientSystemMain {
         // 创建一个自定义配置，覆盖 application.conf 中的端口设置
         // 将端口设置为 0，让 Pekko 随机选择一个可用端口
         Config config = ConfigFactory.parseString(
-                "pekko.remote.artery.canonical.port = 0"
+                "pekko.remote.artery.canonical.port = 25521"
         ).withFallback(ConfigFactory.load());
 
         // 使用自定义配置创建客户端 ActorSystem
