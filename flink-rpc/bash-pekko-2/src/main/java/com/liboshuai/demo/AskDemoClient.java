@@ -23,7 +23,7 @@ public class AskDemoClient {
                 .withFallback(ConfigFactory.load());
 
         final ActorSystem system = ActorSystem.create("ClientSystem", config);
-        log.info("ClientSystem for 'ask' demo started.");
+        log.info("客户端系统已启动，用于 'ask' 模式演示。"); // ClientSystem for 'ask' demo started.
 
         //  **重要**：路径指向我们新创建的 Actor "greeterWithReply"
         final String remotePath = "pekko://RemoteSystem@127.0.0.1:25522/user/greeterWithReply";
@@ -34,12 +34,12 @@ public class AskDemoClient {
         // 定义超时时间
         Duration timeout = Duration.ofSeconds(5);
 
-        log.info("Sending message to {} using 'ask' pattern.", remotePath);
+        log.info("正在使用 'ask' 模式向 {} 发送消息。", remotePath); // Sending message to {} using 'ask' pattern.
 
         // **核心：使用 Patterns.ask 发送消息**
         // 它返回一个 CompletionStage，代表一个未来的结果
         CompletionStage<Object> responseFuture = Patterns.ask(remoteActor, request, timeout);
-        log.info("Ask request sent. Waiting for the response...");
+        log.info("Ask 请求已发送。正在等待响应..."); // Ask request sent. Waiting for the response...
 
         // 由于是异步操作，我们需要一种方式来等待结果，以防 main 线程提前退出
         // CountDownLatch 是一个很好的选择
@@ -49,14 +49,14 @@ public class AskDemoClient {
         responseFuture.whenComplete((response, error) -> {
             if (error != null) {
                 // 处理错误，例如超时 (AskTimeoutException)
-                log.error("Ask request failed!", error);
+                log.error("Ask 请求失败！", error); // Ask request failed!
             } else {
                 // 处理成功响应
                 if (response instanceof GreetingReply) {
                     GreetingReply reply = (GreetingReply) response;
-                    log.info(">>> Successfully received reply: '{}'", reply.getMessage());
+                    log.info(">>> 成功收到回复：'{}'", reply.getMessage()); // Successfully received reply: '{}'
                 } else {
-                    log.warn("Received an unexpected response type: {}", response.getClass().getName());
+                    log.warn("收到了一个意料之外的响应类型：{}", response.getClass().getName()); // Received an unexpected response type: {}
                 }
             }
             // 无论成功还是失败，都减少 latch 的计数，让 main 线程可以继续
@@ -68,6 +68,6 @@ public class AskDemoClient {
 
         // 最终关闭 ActorSystem
         system.terminate();
-        log.info("ClientSystem terminated.");
+        log.info("客户端系统已终止。"); // ClientSystem terminated.
     }
 }
