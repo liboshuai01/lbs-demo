@@ -28,7 +28,7 @@ public class ClientActor extends AbstractActor {
     // 在 Actor 启动时发送消息
     @Override
     public void preStart() {
-        log.info("Sending message to remote actor at {}", remotePath);
+        log.info("正在向远程 Actor 发送消息，地址：{}", remotePath);
         remoteGreeter.tell(new Greet("Pekko User"), getSelf());
     }
 
@@ -36,7 +36,7 @@ public class ClientActor extends AbstractActor {
     public Receive createReceive() {
         // 这个 Actor 目前不处理任何返回消息，但可以扩展
         return receiveBuilder()
-                .matchAny(o -> log.warn("ClientActor received unknown message: {}", o))
+                .matchAny(o -> log.warn("ClientActor 收到未知消息: {}", o))
                 .build();
     }
 }

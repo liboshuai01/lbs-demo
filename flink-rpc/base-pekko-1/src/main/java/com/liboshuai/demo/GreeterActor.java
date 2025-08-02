@@ -20,9 +20,9 @@ public class GreeterActor extends AbstractActor {
         return receiveBuilder()
                 .match(Greet.class, greet -> {
                     // 使用日志记录，可以包含更多上下文信息
-                    log.info("Hello, {}! (from sender: {})", greet.name, getSender());
+                    log.info("你好, {}! (来自发送方: {})", greet.name, getSender());
                 })
-                .matchAny(o -> log.warn("Received unknown message of type: {}", o.getClass().getName()))
+                .matchAny(o -> log.warn("收到未知类型的消息: {}", o.getClass().getName()))
                 .build();
     }
 }

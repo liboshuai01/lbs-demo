@@ -14,14 +14,14 @@ public class RemoteSystemMain {
 
     public static void main(String[] args) {
         final ActorSystem system = ActorSystem.create("RemoteSystem", ConfigFactory.load());
-        log.info("RemoteSystem is ready.");
+        log.info("远程系统已就绪。");
 
         // 创建一个可被远程访问的 Actor
         final ActorRef remoteGreeter = system.actorOf(GreeterActor.props(), "remoteGreeter");
 
-        log.info("Remote Greeter actor created. Full path: {}", remoteGreeter.path());
+        log.info("远程 Greeter actor 已创建。完整路径: {}", remoteGreeter.path());
 
-        log.info(">>> Press ENTER to exit <<<");
+        log.info(">>> 按回车键退出 <<<");
         try {
             System.in.read();
         } catch (Exception e) {

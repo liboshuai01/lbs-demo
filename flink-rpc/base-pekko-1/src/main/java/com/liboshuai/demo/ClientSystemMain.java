@@ -21,7 +21,7 @@ public class ClientSystemMain {
 
         // 使用自定义配置创建客户端 ActorSystem
         final ActorSystem system = ActorSystem.create("ClientSystem", config);
-        log.info("ClientSystem started.");
+        log.info("客户端系统已启动。");
 
         // 定义远程 Actor 的完整路径
         final String remotePath = "pekko://RemoteSystem@127.0.0.1:25520/user/remoteGreeter";
@@ -29,7 +29,7 @@ public class ClientSystemMain {
         // 创建一个 ClientActor 来管理与远程 Actor 的交互
         system.actorOf(ClientActor.props(remotePath), "clientActor");
 
-        log.info(">>> Press ENTER to exit <<<");
+        log.info(">>> 按回车键退出 <<<");
         try {
             System.in.read();
         } catch (Exception e) {
@@ -37,7 +37,7 @@ public class ClientSystemMain {
             e.printStackTrace();
         } finally {
             system.terminate();
-            log.info("ClientSystem terminated.");
+            log.info("客户端系统已终止。");
         }
     }
 }
