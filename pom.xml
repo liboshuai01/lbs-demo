@@ -20,5 +20,6 @@
         <module>springboot-mybatisplus</module>
         <module>springboot-mybatisplus-dynamic</module>
         <module>hexo2wiki-tool</module>
+        <module>flink-rpc</module>
     </modules>
 </project>
