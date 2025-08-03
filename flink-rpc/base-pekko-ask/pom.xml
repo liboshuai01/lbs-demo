@@ -10,7 +10,7 @@
     <artifactId>base-pekko-ask</artifactId>
     <packaging>jar</packaging>
 
-    <name>bash-pekko-2</name>
+    <name>bash-pekko-ask</name>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
