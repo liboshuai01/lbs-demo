@@ -14,13 +14,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @Slf4j
 public class ClientMain {
     public static void main(String[] args) {
-        // 1. 加载配置, 为客户端指定一个不同于服务端的端口 (25521)
+        // 1. 加载配置, 为客户端指定一个不同于服务端的端口 (25523)
         Config config = ConfigFactory.parseString(
                 "pekko.remote.artery.canonical.port = 25523"
         ).withFallback(ConfigFactory.load());
@@ -53,21 +52,28 @@ public class ClientMain {
                 RequestData request = new RequestData(line);
                 CompletionStage<Object> future = Patterns.ask(serverActorSelection, request, timeout);
 
-                log.info("已向服务端发送消息: [{}], 正在等待响应...", line);
+                log.info("已向服务端发送消息: [{}], 等待异步响应...", line);
 
-                // 6. 同步等待并处理结果
-                // 为了在控制台应用中清晰地展示请求-响应流程，我们在这里阻塞等待结果。
-                // 在真实的应用中 (如Web服务)，通常会使用 whenComplete 等非阻塞方式处理 future。
-                try {
-                    // toCompletableFuture().get() 会阻塞当前线程直到结果返回或超时
-                    ResponseData response = (ResponseData) future.toCompletableFuture().get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-                    log.info("从服务端接收到同步响应: [{}]", response.getResponse());
-                } catch (TimeoutException e) {
-                    log.error("请求超时！服务端未在 {} 秒内响应。", timeout.getSeconds());
-                } catch (Exception e) {
-                    // 其他异常，例如序列化失败或远程Actor不存在
-                    log.error("请求未能成功完成", e);
-                }
+                // 6. 【异步处理】使用 whenComplete 回调来处理结果，避免阻塞主线程
+                // 在生产实践中，这种非阻塞的方式是首选。
+                // 主线程在发送消息后可以继续执行其他任务 (在这个控制台应用里，是继续等待下一次输入)。
+                future.whenComplete((response, error) -> {
+                    // 这个回调会在 future 完成时（无论是成功还是失败）被执行
+                    if (error != null) {
+                        // 如果 error 不为 null，说明处理过程中发生了异常
+                        if (error instanceof TimeoutException) {
+                            log.error("请求超时！服务端未在 {} 秒内响应。", timeout.getSeconds());
+                        } else {
+                            // 其他异常，例如序列化失败或远程Actor不存在
+                            log.error("请求未能成功完成", error);
+                        }
+                    } else {
+                        // 如果 error 为 null，说明成功接收到了响应
+                        // 注意：这里需要进行类型转换
+                        ResponseData responseData = (ResponseData) response;
+                        log.info("从服务端接收到异步响应: [{}]", responseData.getResponse());
+                    }
+                });
             }
         } catch (IOException e) {
             log.error("等待输入时发生错误。", e);
