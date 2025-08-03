@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestData implements CborSerializable{
-    private String data;
+    private String message;
 }

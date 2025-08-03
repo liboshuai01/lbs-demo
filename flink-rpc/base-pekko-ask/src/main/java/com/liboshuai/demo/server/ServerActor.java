@@ -2,11 +2,16 @@ package com.liboshuai.demo.server;
 
 import com.liboshuai.demo.common.RequestData;
 import com.liboshuai.demo.common.ResponseData;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 
+@Data
 @Slf4j
+@EqualsAndHashCode(callSuper = true)
 public class ServerActor extends AbstractActor {
 
     public static Props props() {
@@ -17,15 +22,12 @@ public class ServerActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(RequestData.class, requestData -> {
-                    log.info("收到客户端的消息，内容为：[{}]", requestData.getData());
-
-                    String replyMessage = String.format("消息 [%s] 已收到!", requestData.getData());
-                    ResponseData response = new ResponseData(replyMessage);
-
-                    log.info("回应客户端的信息，内容为：[{}]", replyMessage);
-                    getSender().tell(response, getSelf());
+                    log.info("接收到来自客户端的数据: [{}]", requestData.getMessage());
+                    ActorRef sender = getSender();
+                    ResponseData responseData = new ResponseData(String.format("服务端已经收到内容为[%s]的消息了！", requestData.getMessage()));
+                    sender.tell(responseData, getSelf());
+                    log.info("回显给客户端的数据: [{}]", responseData.getMessage());
                 })
-                .matchAny(o -> log.warn("收到未知类型的消息: {}", o.getClass().getName()))
                 .build();
     }
 }
