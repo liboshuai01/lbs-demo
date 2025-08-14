@@ -7,9 +7,7 @@ import org.mini.flink.runtime.stream.DataChannel;
 import org.mini.flink.runtime.stream.StreamTask;
 import org.mini.flink.runtime.taskmanager.TaskManager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,7 +21,7 @@ public class JobManager {
     private final TaskManager taskManager;
     private final CheckpointCoordinator checkpointCoordinator;
     private JobGraph currentJob;
-    private final Map<String, List<DataChannel>> vertexChannels = new ConcurrentHashMap<>();
+    private final Map<String, List<DataChannel>> taskInputChannels = new ConcurrentHashMap<>();
     private final AtomicInteger totalTasksCounter = new AtomicInteger(0);
 
     public JobManager(TaskManager taskManager) {
@@ -54,42 +52,58 @@ public class JobManager {
         });
     }
 
+    // JobManager.java
+
     private void deployJob() throws Exception {
         LOG.info("开始部署作业: " + currentJob.getJobName());
+        taskInputChannels.clear();
+        totalTasksCounter.set(0);
 
-        // 1. 遍历 JobVertex，创建数据通道
-        for (JobVertex vertex : currentJob.getVertices()) {
-            vertexChannels.put(vertex.getId(), new ArrayList<>());
-        }
+        // Key: 上游 Vertex ID, Value: 一个包含所有输出通道的列表
+        Map<String, List<DataChannel>> vertexOutputChannelMap = new HashMap<>();
 
-        // 2. 部署任务
-        for (JobVertex vertex : currentJob.getVertices()) {
-            int parallelism = vertex.getParallelism();
-            List<String> downstreamVertexIds = currentJob.getDownstreamVertexIds(vertex.getId());
+        // 步骤1: 预先创建好所有通道并建立连接关系
+        // 这个循环会填充 taskInputChannels 和 vertexOutputChannelMap
+        for (JobVertex upstreamVertex : currentJob.getVertices()) {
+            List<DataChannel> allOutputsForUpstream = new ArrayList<>();
+            vertexOutputChannelMap.put(upstreamVertex.getId(), allOutputsForUpstream);
 
-            List<DataChannel> outputChannels = new ArrayList<>();
-            if (!downstreamVertexIds.isEmpty()) {
-                // 如果有下游，为每个下游创建一个 channel
-                for (String downstreamId : downstreamVertexIds) {
-                    // TODO: 在多分发场景下，这里需要更复杂的逻辑，目前简化为一个channel
-                }
-                DataChannel channel = new DataChannel(1024); // 容量为1024
-                outputChannels.add(channel);
-                for (String downstreamId : downstreamVertexIds) {
-                    vertexChannels.get(downstreamId).add(channel);
+            List<String> downstreamVertexIds = currentJob.getDownstreamVertexIds(upstreamVertex.getId());
+            for (String downstreamVertexId : downstreamVertexIds) {
+                JobVertex downstreamVertex = currentJob.getVertices().stream()
+                        .filter(v -> v.getId().equals(downstreamVertexId))
+                        .findFirst()
+                        .orElseThrow(() -> new Exception("找不到下游顶点: " + downstreamVertexId));
+
+                // 为每个下游任务的并行实例创建一个专用的输入通道
+                for (int i = 0; i < downstreamVertex.getParallelism(); i++) {
+                    DataChannel channel = new DataChannel(1024);
+                    // 将新通道添加到上游顶点的总输出列表中（用于广播）
+                    allOutputsForUpstream.add(channel);
+
+                    // 记录这个通道是哪个具体下游任务的输入
+                    String downstreamTaskKey = downstreamVertexId + "#" + i;
+                    taskInputChannels.computeIfAbsent(downstreamTaskKey, k -> new ArrayList<>()).add(channel);
                 }
             }
+        }
 
+        // 步骤2: 根据建立好的连接关系来部署任务
+        for (JobVertex vertex : currentJob.getVertices()) {
+            for (int i = 0; i < vertex.getParallelism(); i++) {
+                String taskName = vertex.getName() + " (" + (i + 1) + "/" + vertex.getParallelism() + ")";
+                String taskKey = vertex.getId() + "#" + i;
 
-            for (int i = 0; i < parallelism; i++) {
-                String taskName = vertex.getName() + " (" + (i + 1) + "/" + parallelism + ")";
-                List<DataChannel> inputChannels = vertexChannels.get(vertex.getId());
+                // 获取当前任务实例的所有输入和输出通道
+                List<DataChannel> inputs = taskInputChannels.getOrDefault(taskKey, Collections.emptyList());
+                List<DataChannel> outputs = vertexOutputChannelMap.get(vertex.getId());
 
-                StreamTask task = new StreamTask(taskName, vertex.getLogic(), inputChannels, outputChannels, this);
+                StreamTask task = new StreamTask(taskName, vertex.getLogic(), inputs, outputs, this);
                 taskManager.submitTask(task);
                 totalTasksCounter.incrementAndGet();
             }
         }
+
         LOG.info("作业部署完成，总共启动 " + totalTasksCounter.get() + " 个任务实例。");
     }
 
@@ -121,7 +135,7 @@ public class JobManager {
             // 在我们的简化模型中，一个上游对应一个输出channel，这个channel被所有下游共享
             // 所以我们只需要找到一个下游，获取它的输入channel即可
             String firstDownstreamId = downstreamIds.get(0);
-            channels.addAll(vertexChannels.get(firstDownstreamId));
+            channels.addAll(taskInputChannels.get(firstDownstreamId));
         }
         return channels;
     }
