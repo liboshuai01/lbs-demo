@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.beans.Introspector;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,9 +24,57 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         // 1. 扫描@ComponentScan指定包路径下的所有bean，存放到beanDefinitionMap中 (BeanDefinition表示bean的定义信息）
         scanBeanDefinition(configClazz);
         // 2. 加载所有BeanPostProcessor，并存入beanPostProcessors中
-
+        loadBeanPostProcessors();
         // 3. 创建所有单例非懒加载bean，存放到singletonObjects中
+        loadSingletonObjects();
+    }
 
+    private void loadSingletonObjects() {
+        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
+            String beanName = entry.getKey();
+            BeanDefinition beanDefinition = entry.getValue();
+            if (beanDefinition.isLazy() || !"singleton".equals(beanDefinition.getScope())) {
+                continue;
+            }
+            Object bean = createBean(beanDefinition);
+            singletonObjects.put(beanName, bean);
+        }
+    }
+
+    /**
+     * 创建bean
+     */
+    private static Object createBean(BeanDefinition beanDefinition) {
+        // 实例化bean
+        Object bean = newInstanceBean(beanDefinition);
+        // 初始化bean前
+        // 初始化bean
+        // 初始化bean后
+        return bean;
+    }
+
+    private static Object newInstanceBean(BeanDefinition beanDefinition) {
+        Object bean;
+        try {
+            bean = beanDefinition.getBeanClass().getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        return bean;
+    }
+
+    private void loadBeanPostProcessors() {
+        beanPostProcessors.add(new AopBeanPostProcessor());
+        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
+            BeanDefinition beanDefinition = entry.getValue();
+            Class<?> beanClass = beanDefinition.getBeanClass();
+            if (!BeanPostProcessor.class.isAssignableFrom(beanClass)) {
+                continue;
+            }
+            BeanPostProcessor beanPostProcessor = (BeanPostProcessor) newInstanceBean(beanDefinition);
+            beanPostProcessors.add(beanPostProcessor);
+        }
     }
 
     private void scanBeanDefinition(Class<?> configClazz) {
