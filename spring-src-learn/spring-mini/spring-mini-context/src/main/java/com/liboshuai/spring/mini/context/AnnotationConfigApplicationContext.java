@@ -20,6 +20,9 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 
+    public static final String SCOPE_PROTOTYPE = "prototype";
+    public static final String SCOPE_SINGLETON = "singleton";
+
     public AnnotationConfigApplicationContext(Class<?> configClazz) {
         // 1. 扫描@ComponentScan指定包路径下的所有bean，存放到beanDefinitionMap中 (BeanDefinition表示bean的定义信息）
         scanBeanDefinition(configClazz);
@@ -33,7 +36,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
             String beanName = entry.getKey();
             BeanDefinition beanDefinition = entry.getValue();
-            if (beanDefinition.isLazy() || !"singleton".equals(beanDefinition.getScope())) {
+            if (beanDefinition.isLazy() || !SCOPE_SINGLETON.equals(beanDefinition.getScope())) {
                 continue;
             }
             Object bean = createBean(beanDefinition);
@@ -100,7 +103,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
                 beanName = Introspector.decapitalize(aClass.getSimpleName());
             }
             // 获取scope
-            String scope = "singleton";
+            String scope = SCOPE_SINGLETON;
             if (aClass.isAnnotationPresent(Scope.class)) {
                 scope = aClass.getAnnotation(Scope.class).value();
             }
@@ -180,6 +183,23 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             2. 单例懒加载的bean需要现在创建，并放入到singletonObjects中
             3. 多例bean每get一次就创建一次，且不需要放到singletonObjects中
          */
-        return null;
+        BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+        if (beanDefinition == null) {
+            throw new IllegalStateException("名称为["+beanName+"]的bean不存在");
+        }
+        String scope = beanDefinition.getScope();
+        boolean lazy = beanDefinition.isLazy();
+        Object bean;
+        if (SCOPE_PROTOTYPE.equals(scope)) { // 多例情况下，忽略lazy值
+            bean = createBean(beanDefinition);
+        } else { // 单例
+            if (lazy) { // 单例懒加载
+                // 使用ConcurrentHashMap的computeIfAbsent方法[检查-创建-存入]操作是原子的，保证线程安全
+                bean = singletonObjects.computeIfAbsent(beanName, key -> createBean(beanDefinition));
+            } else { // 单例非懒加载
+                bean = singletonObjects.get(beanName);
+            }
+        }
+        return bean;
     }
 }
