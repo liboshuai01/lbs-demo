@@ -5,9 +5,13 @@ import org.slf4j.LoggerFactory;
 
 import java.beans.Introspector;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AnnotationConfigApplicationContext implements ApplicationContext {
@@ -47,13 +51,38 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     /**
      * 创建bean
      */
-    private static Object createBean(BeanDefinition beanDefinition) {
+    private Object createBean(BeanDefinition beanDefinition) {
         // 实例化bean
         Object bean = newInstanceBean(beanDefinition);
+        // 依赖注入
+        di(beanDefinition);
         // 初始化bean前
         // 初始化bean
         // 初始化bean后
         return bean;
+    }
+
+    private void di(Object bean) {
+        Class<?> beanClass = bean.getClass();
+        Field[] fields = beanClass.getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            if (!field.isAnnotationPresent(Autowired.class)) {
+                continue;
+            }
+            // TODO: @Autowired其实是先按照类型查找，然后再按照名称查找，这里我们先只实现按照名称查找
+            String fieldName = field.getName();
+            if (!beanDefinitionMap.containsKey(fieldName)) {
+                throw new IllegalStateException(beanClass + "中注入依赖bean[" + fieldName + "]时未找到bean");
+            }
+            // TODO: 这里存在循环依赖问题，待引入三级缓存来解决
+            Object diBean = getBean(fieldName);
+            try {
+                field.set(bean, diBean);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private static Object newInstanceBean(BeanDefinition beanDefinition) {
@@ -89,7 +118,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         for (String classNam : allClassNameList) {
             Class<?> aClass;
             try {
-                 aClass = Class.forName(classNam);
+                aClass = Class.forName(classNam);
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -185,7 +214,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
          */
         BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
         if (beanDefinition == null) {
-            throw new IllegalStateException("名称为["+beanName+"]的bean不存在");
+            throw new IllegalStateException("名称为[" + beanName + "]的bean不存在");
         }
         String scope = beanDefinition.getScope();
         boolean lazy = beanDefinition.isLazy();
