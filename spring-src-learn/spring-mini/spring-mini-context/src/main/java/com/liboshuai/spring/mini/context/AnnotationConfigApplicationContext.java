@@ -53,9 +53,9 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      */
     private Object createBean(BeanDefinition beanDefinition) {
         // 实例化bean
-        Object bean = newInstanceBean(beanDefinition);
+        Object bean = newInstanceBean(beanDefinition.getBeanClass());
         // 依赖注入
-        di(beanDefinition);
+        di(bean);
         // 初始化bean前
         // 初始化bean
         // 初始化bean后
@@ -85,10 +85,10 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         }
     }
 
-    private static Object newInstanceBean(BeanDefinition beanDefinition) {
+    private static Object newInstanceBean(Class<?> beanClass) {
         Object bean;
         try {
-            bean = beanDefinition.getBeanClass().getDeclaredConstructor().newInstance();
+            bean = beanClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                  NoSuchMethodException e) {
             throw new RuntimeException(e);
@@ -104,7 +104,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             if (!BeanPostProcessor.class.isAssignableFrom(beanClass)) {
                 continue;
             }
-            BeanPostProcessor beanPostProcessor = (BeanPostProcessor) newInstanceBean(beanDefinition);
+            BeanPostProcessor beanPostProcessor = (BeanPostProcessor) newInstanceBean(beanDefinition.getBeanClass());
             beanPostProcessors.add(beanPostProcessor);
         }
     }
