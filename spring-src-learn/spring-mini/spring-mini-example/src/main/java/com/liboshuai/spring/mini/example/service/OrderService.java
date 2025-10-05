@@ -2,11 +2,13 @@ package com.liboshuai.spring.mini.example.service;
 
 import com.liboshuai.spring.mini.context.Autowired;
 import com.liboshuai.spring.mini.context.Component;
+import com.liboshuai.spring.mini.context.Scope;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component // 标记此类为bean
+@Scope("prototype")
+@Component("OrderService") // 标记此类为bean
 public class OrderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
