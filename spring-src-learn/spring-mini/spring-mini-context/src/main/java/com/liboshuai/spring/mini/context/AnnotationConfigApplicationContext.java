@@ -56,9 +56,12 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         Object bean = newInstanceBean(beanDefinition.getBeanClass());
         // 依赖注入
         di(bean);
-        // 初始化bean前
-        // 初始化bean
-        // 初始化bean后
+        // TODO: 研究一下原生spring，BeanPostProcessor方法的执行情况，我有的不懂
+        // TODO: 初始化bean前：1.BeanPostProcessor的Before初始化方法执行；2.PostConstruct注解的方法执行
+
+        // TODO: 初始化bean：1.InitializingBean的afterPropertiesSet方法执行；2.BeanNameAware的setBeanName方法执行；3.ApplicationContextAware的setApplicationContext方法执行
+
+        // TODO: 初始化bean后：1.BeanPostProcessor的after初始化方法执行
         return bean;
     }
 
@@ -70,12 +73,12 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             if (!field.isAnnotationPresent(Autowired.class)) {
                 continue;
             }
-            // TODO: @Autowired其实是先按照类型查找，然后再按照名称查找，这里我们先只实现按照名称查找
+            // FIXME: @Autowired其实是先按照类型查找，然后再按照名称查找，这里我们先只实现按照名称查找
             String fieldName = field.getName();
             if (!beanDefinitionMap.containsKey(fieldName)) {
                 throw new IllegalStateException(beanClass + "中注入依赖bean[" + fieldName + "]时未找到bean");
             }
-            // TODO: 这里存在循环依赖问题，待引入三级缓存来解决
+            // FIXME: 这里存在循环依赖问题，待引入三级缓存来解决
             Object diBean = getBean(fieldName);
             try {
                 field.set(bean, diBean);
