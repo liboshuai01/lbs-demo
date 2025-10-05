@@ -17,10 +17,14 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
     private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
+
     public AnnotationConfigApplicationContext(Class<?> configClazz) {
         // 1. 扫描@ComponentScan指定包路径下的所有bean，存放到beanDefinitionMap中 (BeanDefinition表示bean的定义信息）
         scanBeanDefinition(configClazz);
-        // 2. 创建所有单例非懒加载bean，存放到singletonObjects中
+        // 2. 加载所有BeanPostProcessor，并存入beanPostProcessors中
+
+        // 3. 创建所有单例非懒加载bean，存放到singletonObjects中
 
     }
 
