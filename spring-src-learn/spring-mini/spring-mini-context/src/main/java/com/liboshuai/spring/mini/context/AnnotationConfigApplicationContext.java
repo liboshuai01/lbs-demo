@@ -3,31 +3,108 @@ package com.liboshuai.spring.mini.context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.beans.Introspector;
+import java.io.File;
+import java.net.URL;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AnnotationConfigApplicationContext implements ApplicationContext{
+public class AnnotationConfigApplicationContext implements ApplicationContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnnotationConfigApplicationContext.class);
 
     private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
-    
+
     private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
     public AnnotationConfigApplicationContext(Class<?> configClazz) {
         // 1. 扫描@ComponentScan指定包路径下的所有bean，存放到beanDefinitionMap中 (BeanDefinition表示bean的定义信息）
         scanBeanDefinition(configClazz);
-        
         // 2. 创建所有单例非懒加载bean，存放到singletonObjects中
-        
+
     }
 
     private void scanBeanDefinition(Class<?> configClazz) {
         // 效验一个传入的配置类
         verifyConfig(configClazz);
-        String componentScanValue = configClazz.getAnnotation(ComponentScan.class).value();
+        // 获取扫描路径下所有类全限定名
+        List<String> allClassNameList = getAllClassNameList(configClazz);
+        // 将符合要求的类转为BeanDefinition，并存入beanDefinitionMap中
+        for (String classNam : allClassNameList) {
+            Class<?> aClass;
+            try {
+                 aClass = Class.forName(classNam);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            // 一定要有@Component注解，不然不识别为一个bean
+            if (!aClass.isAnnotationPresent(Component.class)) {
+                continue;
+            }
+            // 获取beanName
+            String beanName = aClass.getAnnotation(Component.class).value();
+            if (beanName == null || beanName.trim().isEmpty()) {
+                beanName = Introspector.decapitalize(aClass.getSimpleName());
+            }
+            // 获取scope
+            String scope = "singleton";
+            if (aClass.isAnnotationPresent(Scope.class)) {
+                scope = aClass.getAnnotation(Scope.class).value();
+            }
+            // 获取lazy
+            boolean lazy = false;
+            if (aClass.isAnnotationPresent(Lazy.class)) {
+                lazy = aClass.getAnnotation(Lazy.class).value();
+            }
+            // 创建 beanDefinition
+            BeanDefinition beanDefinition = new BeanDefinition(aClass, scope, lazy);
+            // 存入 beanDefinitionMap
+            beanDefinitionMap.put(beanName, beanDefinition);
+        }
+    }
 
+    private List<String> getAllClassNameList(Class<?> configClazz) {
+        String[] componentScanValues = configClazz.getAnnotation(ComponentScan.class).value();
+        List<String> allClassNameList = new ArrayList<>();
+        for (String packageName : componentScanValues) {
+            String packagePath = packageName.replace(".", "/");
+            ClassLoader appClassLoader = this.getClass().getClassLoader();
+            URL url = appClassLoader.getResource(packagePath);
+            if (url == null) {
+                throw new IllegalArgumentException("@ComponentScan注解的value值[{" + packageName + "}]非法");
+            }
+            List<String> classNameList = scanDirectory(new File(url.getFile()), packageName);
+            allClassNameList.addAll(classNameList);
+        }
+        return allClassNameList;
+    }
+
+    /**
+     * 递归地扫描一个目录，找到所有的 .class 文件，并将它们转换为完全限定类名。
+     *
+     * @param directory   开始扫描的目录。
+     * @param basePackage 与该目录对应的基础包名 (例如 "com.liboshuai.demo")。
+     * @return 一个包含完全限定类名的列表 (例如 "com.liboshuai.demo.service.MyService")。
+     */
+    private List<String> scanDirectory(File directory, String basePackage) {
+        List<String> classNames = new ArrayList<>();
+        File[] files = directory.listFiles();
+        if (files == null) {
+            LOGGER.warn("要扫描的目录为空或不是一个有效目录: {}", directory.getPath());
+            return classNames; // 返回空列表
+        }
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                // 如果是目录，就以更新后的包名递归扫描它
+                classNames.addAll(scanDirectory(file, basePackage + "." + file.getName()));
+            } else if (file.getName().endsWith(".class")) {
+                // 如果是 .class 文件，就构建它的完全限定类名
+                String simpleClassName = file.getName().substring(0, file.getName().length() - 6);
+                classNames.add(basePackage + "." + simpleClassName);
+            }
+        }
+        return classNames;
     }
 
     private static void verifyConfig(Class<?> configClazz) {
@@ -37,8 +114,8 @@ public class AnnotationConfigApplicationContext implements ApplicationContext{
         if (!configClazz.isAnnotationPresent(ComponentScan.class)) {
             throw new IllegalStateException(configClazz + "请使用@ComponentScan注解标注");
         }
-        String componentScanValue = configClazz.getAnnotation(ComponentScan.class).value();
-        if (componentScanValue == null || componentScanValue.trim().isEmpty()) {
+        String[] componentScanValues = configClazz.getAnnotation(ComponentScan.class).value();
+        if (componentScanValues == null || componentScanValues.length == 0) {
             throw new IllegalStateException(configClazz + "的@ComponentScan注解请传入对应值");
         }
     }
