@@ -22,5 +22,6 @@
         <module>hexo2wiki-tool</module>
         <module>flink-rpc</module>
         <module>mini-flink</module>
+        <module>spring-src-learn</module>
     </modules>
 </project>
