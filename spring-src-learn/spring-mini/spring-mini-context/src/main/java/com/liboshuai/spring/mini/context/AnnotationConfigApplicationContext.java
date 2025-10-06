@@ -234,4 +234,9 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         }
         return bean;
     }
+
+    @Override
+    public int getBeanDefinitionCount() {
+        return beanDefinitionMap.size();
+    }
 }
