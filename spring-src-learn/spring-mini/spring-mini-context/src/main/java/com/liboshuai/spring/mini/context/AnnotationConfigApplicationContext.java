@@ -151,7 +151,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     }
 
     private void loadBeanPostProcessors() {
-        beanPostProcessors.add(new AopBeanPostProcessor());
+        beanPostProcessors.add(new AopBeanPostProcessor(this));
         for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
             BeanDefinition beanDefinition = entry.getValue();
             Class<?> beanClass = beanDefinition.getBeanClass();
@@ -289,5 +289,10 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     @Override
     public int getBeanDefinitionCount() {
         return beanDefinitionMap.size();
+    }
+
+    @Override
+    public Map<String, BeanDefinition> getBeanDefinitionMap() {
+        return beanDefinitionMap;
     }
 }
