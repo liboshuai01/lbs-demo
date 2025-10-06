@@ -14,7 +14,5 @@ public class Application {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
         OrderService orderService = (OrderService) context.getBean("OrderService");
         orderService.test();
-        LOGGER.info("bean: {}", context.getBean("OrderService"));
-        LOGGER.info("bean: {}", context.getBean("OrderService"));
     }
 }
