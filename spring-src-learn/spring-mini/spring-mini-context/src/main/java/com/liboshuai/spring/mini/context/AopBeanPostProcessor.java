@@ -26,7 +26,7 @@ public class AopBeanPostProcessor implements BeanPostProcessor {
             @Override
             public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
                 // 通过反射执行Before中的增强方法
-                LOGGER.info("调用了AopBeanPostProcessor的postProcessAfterInitialization方法, beanName: {}", beanName);
+                LOGGER.info("调用了AppAspect类的beforeMethod方法");
                 return method.invoke(bean, objects);
             }});
         // 4. 创建代理对象并返回

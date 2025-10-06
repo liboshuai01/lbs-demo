@@ -63,10 +63,10 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         // 初始化bean
         invokeBeanNameAware(beanName, bean); // 执行BeanNameAware的setBeanName方法
         invokeApplicationContextAware(bean); // 执行ApplicationContextAware的setApplicationContext方法
-        invokeBeanPostProcessorBefore(beanName, bean); // 执行BeanPostProcessor的postProcessBeforeInitialization
+        bean = invokeBeanPostProcessorBefore(beanName, bean); // 执行BeanPostProcessor的postProcessBeforeInitialization
         invokePostConstruct(bean); // 执行@PostConstruct方法
         invokeInitializingBean(bean); // 执行InitializingBean的afterPropertiesSet方法
-        invokeBeanPostProcessorAfter(beanName, bean); // 执行BeanPostProcessor的postProcessAfterInitialization方法
+        bean = invokeBeanPostProcessorAfter(beanName, bean); // 执行BeanPostProcessor的postProcessAfterInitialization方法
         return bean;
     }
 
@@ -90,16 +90,18 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         }
     }
 
-    private void invokeBeanPostProcessorAfter(String beanName, Object bean) {
+    private Object invokeBeanPostProcessorAfter(String beanName, Object bean) {
         for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
-            beanPostProcessor.postProcessAfterInitialization(bean, beanName);
+            bean = beanPostProcessor.postProcessAfterInitialization(bean, beanName);
         }
+        return bean;
     }
 
-    private void invokeBeanPostProcessorBefore(String beanName, Object bean) {
+    private Object invokeBeanPostProcessorBefore(String beanName, Object bean) {
         for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
-            beanPostProcessor.postProcessBeforeInitialization(bean, beanName);
+            bean = beanPostProcessor.postProcessBeforeInitialization(bean, beanName);
         }
+        return bean;
     }
 
     private void invokeApplicationContextAware(Object bean) {
