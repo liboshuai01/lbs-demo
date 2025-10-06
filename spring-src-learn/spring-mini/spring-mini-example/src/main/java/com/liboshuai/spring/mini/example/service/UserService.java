@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 @Component // 标记此类为bean
 public class UserService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     public void test() {
-        LOGGER.info("调用了UserService的test方法");
+        log.info("调用了UserService的test方法");
     }
 }

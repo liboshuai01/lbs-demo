@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AnnotationConfigApplicationContext implements ApplicationContext {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotationConfigApplicationContext.class);
+    private static final Logger log = LoggerFactory.getLogger(AnnotationConfigApplicationContext.class);
 
     private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
 
@@ -229,7 +229,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         List<String> classNames = new ArrayList<>();
         File[] files = directory.listFiles();
         if (files == null) {
-            LOGGER.warn("要扫描的目录为空或不是一个有效目录: {}", directory.getPath());
+            log.warn("要扫描的目录为空或不是一个有效目录: {}", directory.getPath());
             return classNames; // 返回空列表
         }
 

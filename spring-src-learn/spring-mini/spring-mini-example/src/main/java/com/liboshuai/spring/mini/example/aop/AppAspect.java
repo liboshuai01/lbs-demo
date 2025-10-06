@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 @Component
 public class AppAspect {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppAspect.class);
+    private static final Logger log = LoggerFactory.getLogger(AppAspect.class);
 
     @Before("execution(* com.liboshuai.spring.mini.example.service.OrderService.*(..))")
     public void beforeMethod() {
-        LOGGER.info("调用了AppAspect类的beforeMethod方法");
+        log.info("调用了AppAspect类的beforeMethod方法");
     }
 }
