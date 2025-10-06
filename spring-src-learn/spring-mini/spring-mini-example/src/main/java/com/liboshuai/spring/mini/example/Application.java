@@ -14,7 +14,16 @@ public class Application {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
         OrderService orderService = (OrderService) context.getBean("OrderService");
         orderService.test();
-        LOGGER.info("bean: {}", context.getBean("OrderService"));
-        LOGGER.info("bean: {}", context.getBean("OrderService"));
     }
 }
+/*
+调用了BeanNameAware的setBeanName方法, beanName: OrderService
+调用了ApplicationContextAware的setApplicationContext方法, beanDefinitionCount: 11
+调用了AppBeanPostProcessor的postProcessBeforeInitialization，beanName: OrderService
+调用了OrderService的postConstructMethod方法
+调用了InitializingBean的afterPropertiesSet方法
+调用了AppBeanPostProcessor的postProcessAfterInitialization，beanName: OrderService
+调用了AppAspect类的beforeMethod方法
+调用了OrderService的test方法
+调用了UserService的test方法
+ */
