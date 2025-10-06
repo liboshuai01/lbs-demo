@@ -1,5 +1,6 @@
 package com.liboshuai.spring.mini.context;
 
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,6 +8,7 @@ import java.beans.Introspector;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,17 +54,64 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      * 创建bean
      */
     private Object createBean(BeanDefinition beanDefinition) {
+        Class<?> beanClass = beanDefinition.getBeanClass();
+        String beanName = beanDefinition.getBeanName();
         // 实例化bean
-        Object bean = newInstanceBean(beanDefinition.getBeanClass());
+        Object bean = newInstanceBean(beanClass);
         // 依赖注入
         di(bean);
-        // TODO: 研究一下原生spring，BeanPostProcessor方法的执行情况，我有的不懂
-        // TODO: 初始化bean前：1.BeanPostProcessor的Before初始化方法执行；2.PostConstruct注解的方法执行
-
-        // TODO: 初始化bean：1.InitializingBean的afterPropertiesSet方法执行；2.BeanNameAware的setBeanName方法执行；3.ApplicationContextAware的setApplicationContext方法执行
-
-        // TODO: 初始化bean后：1.BeanPostProcessor的after初始化方法执行
+        // 初始化bean
+        invokeBeanNameAware(beanName, bean); // 执行BeanNameAware的setBeanName方法
+        invokeApplicationContextAware(bean); // 执行ApplicationContextAware的setApplicationContext方法
+        invokeBeanPostProcessorBefore(beanName, bean); // 执行BeanPostProcessor的postProcessBeforeInitialization
+        invokePostConstruct(bean); // 执行@PostConstruct方法
+        invokeInitializingBean(bean); // 执行InitializingBean的afterPropertiesSet方法
+        invokeBeanPostProcessorAfter(beanName, bean); // 执行BeanPostProcessor的postProcessAfterInitialization方法
         return bean;
+    }
+
+    private static void invokeInitializingBean(Object bean) {
+        if (bean instanceof InitializingBean initializingBean) {
+            initializingBean.afterPropertiesSet();
+        }
+    }
+
+    private static void invokePostConstruct(Object bean) {
+        for (Method method : bean.getClass().getDeclaredMethods()) {
+            method.setAccessible(true);
+            if (!method.isAnnotationPresent(PostConstruct.class)) {
+                continue;
+            }
+            try {
+                Object ignore = method.invoke(bean);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void invokeBeanPostProcessorAfter(String beanName, Object bean) {
+        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+            beanPostProcessor.postProcessAfterInitialization(bean, beanName);
+        }
+    }
+
+    private void invokeBeanPostProcessorBefore(String beanName, Object bean) {
+        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+            beanPostProcessor.postProcessBeforeInitialization(bean, beanName);
+        }
+    }
+
+    private void invokeApplicationContextAware(Object bean) {
+        if (bean instanceof ApplicationContextAware applicationContextAware) {
+            applicationContextAware.setApplicationContext(this);
+        }
+    }
+
+    private void invokeBeanNameAware(String beanName, Object bean) {
+        if (bean instanceof BeanNameAware beanNameAware) {
+            beanNameAware.setBeanName(beanName);
+        }
     }
 
     private void di(Object bean) {
@@ -145,7 +194,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
                 lazy = aClass.getAnnotation(Lazy.class).value();
             }
             // 创建 beanDefinition
-            BeanDefinition beanDefinition = new BeanDefinition(aClass, scope, lazy);
+            BeanDefinition beanDefinition = new BeanDefinition(beanName, aClass, scope, lazy);
             // 存入 beanDefinitionMap
             beanDefinitionMap.put(beanName, beanDefinition);
         }
