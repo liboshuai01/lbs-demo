@@ -23,5 +23,6 @@
         <module>flink-rpc</module>
         <module>mini-flink</module>
         <module>spring-src-learn</module>
+        <module>spi-demo</module>
     </modules>
 </project>
