@@ -39,7 +39,7 @@ public class Main {
             // 5. try-with-resources 会自动调用 LbsConnection.close()
 
         } catch (SQLException e) {
-            throw new RuntimeException("Main: 获取连接失败！");
+            throw new RuntimeException("Main: 获取连接失败！原因：", e);
         }
 
         System.out.println("--- 演示结束 ---");
