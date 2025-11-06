@@ -1,5 +1,6 @@
 package cn.liboshuai.demo.cf;
 
+import cn.liboshuai.demo.cf.function.FunctionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,41 +21,33 @@ public class BasicChainingDemo {
 
     public static final Logger log = LoggerFactory.getLogger(BasicChainingDemo.class);
 
-    record User(long id, String name) {}
+    record User(long id, String name) {
+    }
 
-    record Order(String id, long userId, String item) {}
+    record Order(String id, long userId, String item) {
+    }
 
     /**
      * 模拟从数据库或API中获取用户
      */
-    private static User fetchUser(long id) {
-        try {
-            log.info("开始查询用户id：{}", id);
-            TimeUnit.SECONDS.sleep(1);
-            log.info("用户查询完毕。");
-            return new User(id, "用户李" + id);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        }
+    private static User fetchUser(long id) throws InterruptedException {
+        log.info("开始查询用户id：{}", id);
+        TimeUnit.SECONDS.sleep(1);
+        log.info("用户查询完毕。");
+        return new User(id, "用户李" + id);
     }
 
     /**
      * 模拟根据用户获取其订单列表
      */
-    private static List<Order> fetchOrders(User user) {
-        try {
-            log.info("开始查询{}的订单", user);
-            TimeUnit.SECONDS.sleep(2);
-            log.info("订单查询完毕。");
-            return List.of(
-                    new Order("order-123", user.id(), "笔记本电脑"),
-                    new Order("order-456", user.id(), "机械键盘")
-            );
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        }
+    private static List<Order> fetchOrders(User user) throws InterruptedException{
+        log.info("开始查询{}的订单", user);
+        TimeUnit.SECONDS.sleep(2);
+        log.info("订单查询完毕。");
+        return List.of(
+                new Order("order-123", user.id(), "笔记本电脑"),
+                new Order("order-456", user.id(), "机械键盘")
+        );
     }
 
     public static void main(String[] args) {
@@ -67,8 +60,8 @@ public class BasicChainingDemo {
         });
         long userId = 101L;
         log.info("开始组装异步任务链条Cf....");
-        CompletableFuture<Void> cf = CompletableFuture.supplyAsync(() -> fetchUser(userId), ioExecutor)
-                .thenApplyAsync(BasicChainingDemo::fetchOrders, ioExecutor)
+        CompletableFuture<Void> cf = CompletableFuture.supplyAsync(FunctionUtils.uncheckedSupplier(() -> fetchUser(userId)), ioExecutor)
+                .thenApplyAsync(FunctionUtils.uncheckedFunction(BasicChainingDemo::fetchOrders), ioExecutor)
                 .thenApply(orders -> {
                     log.info("开始同步计算订单数量...");
                     return orders.size();
