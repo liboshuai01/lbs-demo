@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 演示 CompletableFuture 的基本链式调用：
@@ -58,9 +59,10 @@ public class BasicChainingDemo {
 
     public static void main(String[] args) {
         log.info("主线程开始运行...");
+        AtomicInteger threadCount = new AtomicInteger(0);
         ExecutorService ioExecutor = Executors.newFixedThreadPool(3, r -> {
             Thread thread = new Thread(r);
-            thread.setName("io-executor-" + thread.getId());
+            thread.setName("io-executor-" + threadCount.getAndAdd(1));
             return thread;
         });
         long userId = 101L;
@@ -86,17 +88,17 @@ public class BasicChainingDemo {
         }
         /*
         控制台结果：
-            1. 主线程开始运行...
-            2. 开始组装异步任务链条Cf....
-            3. 提交异步任务链条cf...
-            4. 开始查询用户id：101
-            5. 用户查询完毕。
-            6. 开始查询User[id=101, name=用户李101]的订单
-            7. 订单查询完毕。
-            8. 开始同步计算订单数量...
-            9. 任务完成！101用户共有2个订单
-            10. 异步任务执行完毕...
-            11. 关闭线程池
+            1. [main]主线程开始运行...
+            2. [main]开始组装异步任务链条Cf....
+            3. [main]提交异步任务链条cf...
+            4. [io-executor-0]开始查询用户id：101
+            5. [io-executor-0]用户查询完毕。
+            6. [io-executor-1]开始查询User[id=101, name=用户李101]的订单
+            7. [io-executor-1]订单查询完毕。
+            8. [io-executor-1]开始同步计算订单数量...
+            9. [io-executor-1]任务完成！101用户共有2个订单
+            10. [mian]异步任务执行完毕...
+            11. [mian]关闭线程池
          */
     }
 
