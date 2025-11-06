@@ -1,5 +1,6 @@
 package cn.liboshuai.demo.cf;
 
+import cn.liboshuai.demo.cf.function.FunctionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,40 +12,28 @@ public class DependentCallsDemo {
 
     public static final Logger log = LoggerFactory.getLogger(DependentCallsDemo.class);
 
-    record User(long id, String name, String friendListId) {}
+    record User(long id, String name, String friendListId) {
+    }
 
-    record Friend(long id, String name) {}
+    record Friend(long id, String name) {
+    }
 
     private static CompletableFuture<User> getUserProfile(long id, Executor executor) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                log.info("开始查询用户Id为{}的简介信息", id);
-                TimeUnit.SECONDS.sleep(1);
-                log.info("用户简介信息查询完毕");
-                return new User(id, "用户李" + id, "2,3,4");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException(e);
-            }
-        }, executor);
+        return CompletableFuture.supplyAsync(FunctionUtils.uncheckedSupplier(() -> {
+            log.info("开始查询用户Id为{}的简介信息", id);
+            TimeUnit.SECONDS.sleep(1);
+            log.info("用户简介信息查询完毕");
+            return new User(id, "用户李" + id, "2,3,4");
+        }), executor);
     }
 
     private static CompletableFuture<List<Friend>> getFriendList(String friendListId, Executor executor) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                log.info("开始查询朋友id为{}的好友列表", friendListId);
-                TimeUnit.SECONDS.sleep(2);
-                log.info("好友列表查询完毕");
-                return List.of(
-                  new Friend(2, "朋友2"),
-                  new Friend(3, "朋友3"),
-                  new Friend(4, "朋友4")
-                );
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException(e);
-            }
-        }, executor);
+        return CompletableFuture.supplyAsync(FunctionUtils.uncheckedSupplier(() -> {
+            log.info("开始查询朋友id为{}的好友列表", friendListId);
+            TimeUnit.SECONDS.sleep(2);
+            log.info("好友列表查询完毕");
+            return List.of(new Friend(2, "朋友2"), new Friend(3, "朋友3"), new Friend(4, "朋友4"));
+        }), executor);
     }
 
 
@@ -58,14 +47,13 @@ public class DependentCallsDemo {
         });
         long userId = 101L;
         log.info("开始组装异步任务链");
-        CompletableFuture<Void> cf = getUserProfile(userId, ioExecutor)
-                .thenCompose(user -> {
-                    log.info("已经成功获取到用户id，现在开始获取好友列表了。");
-                    return getFriendList(user.friendListId, ioExecutor);
-                }).thenAccept(friends -> {
-                    log.info("任务链完成！{}用户的好友列表共计{}个人", userId, friends.size());
-                    friends.forEach(friend -> log.info("    -> {}", friend.name));
-                });
+        CompletableFuture<Void> cf = getUserProfile(userId, ioExecutor).thenCompose(user -> {
+            log.info("已经成功获取到用户id，现在开始获取好友列表了。");
+            return getFriendList(user.friendListId, ioExecutor);
+        }).thenAccept(friends -> {
+            log.info("任务链完成！{}用户的好友列表共计{}个人", userId, friends.size());
+            friends.forEach(friend -> log.info("    -> {}", friend.name));
+        });
         log.info("提交异步任务链");
         try {
             cf.get(5, TimeUnit.SECONDS);
