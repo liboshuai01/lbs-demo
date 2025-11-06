@@ -24,5 +24,6 @@
         <module>mini-flink</module>
         <module>spring-src-learn</module>
         <module>spi-demo</module>
+        <module>completable-future</module>
     </modules>
 </project>
