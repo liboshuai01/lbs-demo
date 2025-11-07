@@ -1,6 +1,6 @@
 package cn.liboshuai.demo.cf;
 
-import cn.liboshuai.demo.cf.function.FunctionUtils;
+import cn.liboshuai.demo.cf.util.FunctionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
