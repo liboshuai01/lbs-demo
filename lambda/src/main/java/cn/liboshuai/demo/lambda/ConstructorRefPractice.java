@@ -13,21 +13,19 @@ public class ConstructorRefPractice {
 
     public static final Logger log = LoggerFactory.getLogger(ConstructorRefPractice.class);
 
-    static class Person {
-        private final String name;
+    record Person(String name) {
+            Person(String name) {
+                this.name = name;
+                log.info("-> [Person 构造器] 正在创建: {}", name);
+            }
 
-        public Person(String name) {
-            this.name = name;
-            log.info("-> [Person 构造器] 正在创建: {}", name);
+            @Override
+            public String toString() {
+                return "Person{" +
+                        "name='" + name + '\'' +
+                        '}';
+            }
         }
-
-        @Override
-        public String toString() {
-            return "Person{" +
-                    "name='" + name + '\'' +
-                    '}';
-        }
-    }
 
     public static void main(String[] args) {
         System.out.println("### 变体 A: 匹配无参构造 () -> new ClassName() ###");
