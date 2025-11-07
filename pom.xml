@@ -24,7 +24,6 @@
         <module>mini-flink</module>
         <module>spring-src-learn</module>
         <module>spi-demo</module>
-        <module>completable-future</module>
-        <module>lambda</module>
+        <module>java-base</module>
     </modules>
 </project>

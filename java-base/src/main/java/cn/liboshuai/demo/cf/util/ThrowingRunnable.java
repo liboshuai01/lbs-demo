@@ -1,4 +1,4 @@
-package cn.liboshuai.demo.cf.function;
+package cn.liboshuai.demo.cf.util;
 
 @FunctionalInterface
 public interface ThrowingRunnable<E extends Throwable> {
