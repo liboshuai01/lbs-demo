@@ -1,4 +1,4 @@
-package cn.liboshuai.demo;
+package cn.liboshuai.demo.generic;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
