@@ -25,5 +25,6 @@
         <module>spring-src-learn</module>
         <module>spi-demo</module>
         <module>completable-future</module>
+        <module>lambda</module>
     </modules>
 </project>
