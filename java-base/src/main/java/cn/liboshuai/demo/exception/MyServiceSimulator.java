@@ -113,7 +113,7 @@ public class MyServiceSimulator {
             log.error("配置失败 (Specific Catch): ", e);
         }
 
-        log.info("\n--- 尝试运行服务 (场景 2: 捕获非受检异常 - 状态错误) ---");
+        log.info("--- 尝试运行服务 (场景 2: 捕获非受检异常 - 状态错误) ---");
         // --- 场景 2: 处理“非受检”异常 (和原来一样) ---
         // 注意：因为场景 1 失败了，service1.initialized 仍然是 false
         try {
@@ -124,7 +124,7 @@ public class MyServiceSimulator {
         }
 
         // --- 场景 3: 新增 - 捕获我们新增的、带ID的异常 ---
-        log.info("\n--- 尝试运行服务 (场景 3: 捕获带ID的新异常) ---");
+        log.info("--- 尝试运行服务 (场景 3: 捕获带ID的新异常) ---");
         MyServiceSimulator service2 = new MyServiceSimulator("FailureTestService-002");
         try {
             // 我们用辅助方法模拟配置加载成功，并设置一个会触发错误的端口
