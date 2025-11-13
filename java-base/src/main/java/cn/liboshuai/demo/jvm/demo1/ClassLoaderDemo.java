@@ -41,7 +41,7 @@ public class ClassLoaderDemo {
         System.out.println("\nString.class (来自 java.base) 是由哪个加载器加载的?");
         System.out.println(String.class.getClassLoader());
 
-        // 演示二：加载平台库中的类 (java.sql.Driver) 【新增】
+        // 演示二：加载平台库中的类 (java.sql.Driver)
         // Driver 类属于 java.sql 模块, 它由 平台类加载器 (PlatformClassLoader) 加载
         // 我们使用 Class.forName() 来确保它被加载
         System.out.println("\njava.sql.Driver.class (来自 java.sql) 是由哪个加载器加载的?");
