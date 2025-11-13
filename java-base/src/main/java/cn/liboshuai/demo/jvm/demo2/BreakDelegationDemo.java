@@ -45,47 +45,58 @@ public class BreakDelegationDemo {
         public Class<?> loadClass(String name) throws ClassNotFoundException {
             System.out.println("\n[CustomClassLoader]: 收到加载请求: " + name);
 
-            // 1. 检查类是否已经被加载过了
-            //    这是 JVM 必需的，防止同一个类被加载多次
-            Class<?> loadedClass = findLoadedClass(name);
-            if (loadedClass != null) {
-                System.out.println("  [CustomClassLoader]: " + name + " 已经被加载过了 (来自 JVM 缓存)");
-                return loadedClass;
-            }
+            // 1. [关键：线程安全]
+            //    我们必须像父类 ClassLoader.loadClass 一样，
+            //    使用 getClassLoadingLock 来确保 "检查-加载" 这个复合操作的原子性
+            synchronized (getClassLoadingLock(name)) {
 
-            // 2. [关键：打破规则]
-            //    我们只对我们自己的包 (com.example.*) 实行 "子优先 (Child-First)"
-            if (name.startsWith("com.example.")) {
-                System.out.println("  [CustomClassLoader]: 这是一个 'com.example' 包下的类，执行 Child-First 策略");
-                try {
-                    // 2a. [子优先] 优先尝试用 findClass() (即我们自己的路径) 加载
-                    loadedClass = findClass(name);
-                    if (loadedClass != null) {
-                        return loadedClass;
-                    }
-                } catch (ClassNotFoundException e) {
-                    // 在子加载器中没找到，没关系，继续往下
-                    System.out.println("  [CustomClassLoader]: Child-First 未在 " + customClassPath + " 找到, 尝试委托给 Parent...");
+                // 2. 检查类是否已经被加载过了
+                //    这是 JVM 必需的，防止同一个类被加载多次
+                Class<?> loadedClass = findLoadedClass(name);
+                if (loadedClass != null) {
+                    System.out.println("  [CustomClassLoader]: " + name + " 已经被加载过了 (来自 JVM 缓存)");
+                    return loadedClass;
                 }
-            } else {
-                System.out.println("  [CustomClassLoader]: 这*不是* 'com.example' 包下的类，执行 Parent-First (默认) 策略");
-            }
 
-            // 3. [遵守规则 / 回退]
-            //    - 如果是 "java.*" (由 Bootstrap / Platform 加载)
-            //    - 或者是 "com.example." 但在子加载器中没找到
-            //    - 或者是我们不关心的其他类 (e.g., org.junit.*)
-            //    都委托给父加载器 (AppClassLoader) 去走标准的双亲委派流程
-            System.out.println("  [CustomClassLoader]: 委托给父加载器 (AppClassLoader) 加载 " + name);
-            return super.loadClass(name);
-            // super.loadClass() 会调用 getParent().loadClass()
+                // 3. [关键：打破规则]
+                //    我们只对我们自己的包 (com.example.*) 实行 "子优先 (Child-First)"
+                if (name.startsWith("com.example.")) {
+                    System.out.println("  [CustomClassLoader]: 这是一个 'com.example' 包下的类，执行 Child-First 策略");
+                    try {
+                        // 3a. [子优先] 优先尝试用 findClass() (即我们自己的路径) 加载
+                        loadedClass = findClass(name);
+                        if (loadedClass != null) {
+                            // 成功找到，直接返回，加载流程结束
+                            return loadedClass;
+                        }
+                    } catch (ClassNotFoundException e) {
+                        // 在子加载器中没找到，没关系，继续往下
+                        System.out.println("  [CustomClassLoader]: Child-First 未在 " + customClassPath + " 找到, 尝试委托给 Parent...");
+                        // 注意：我们捕获了异常，并允许代码继续执行第 4 步
+                    }
+                } else {
+                    System.out.println("  [CustomClassLoader]: 这*不是* 'com.example' 包下的类，执行 Parent-First (默认) 策略");
+                }
+
+                // 4. [遵守规则 / 回退]
+                //    - 如果是 "非 com.example." 的类 (Parent-First)
+                //    - 或者是 "com.example." 但在第 3 步的 findClass 中没找到 (回退到 Parent)
+                //    都委托给父加载器 (AppClassLoader) 去走标准的双亲委派流程
+                System.out.println("  [CustomClassLoader]: 委托给父加载器 (AppClassLoader) 加载 " + name);
+
+                // 我们调用 super.loadClass()，它会安全地处理父类委托 和
+                // 最终回退到调用 this.findClass() 的逻辑。
+                // (虽然对于 "com.example." 的类，findClass 会被调用两次，但结果是正确的)
+                return super.loadClass(name);
+            }
         }
 
         /**
          * 辅助方法：从文件系统读取 .class 文件的字节码
+         * (此方法无需修改)
          */
-        private byte[] loadClassData(String className) {
-            // 将 "com.example.MyTestClass" 转换为 "temp_classes/com/example/MyTestClass.class"
+        private byte[] loadClassData(String className) { //
+            // ... (省略未修改的代码)
             String path = customClassPath + File.separator + className.replace('.', File.separatorChar) + ".class";
 
             try (InputStream in = new FileInputStream(path);
@@ -99,8 +110,6 @@ public class BreakDelegationDemo {
                 return out.toByteArray();
 
             } catch (IOException e) {
-                // 找不到文件是正常情况 (e.g., 委托加载 java.lang.String 时)
-                // System.out.println("    loadClassData: " + e.getMessage());
                 return null;
             }
         }
