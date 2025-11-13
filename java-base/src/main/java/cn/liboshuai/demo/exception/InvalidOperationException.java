@@ -1,6 +1,5 @@
 package cn.liboshuai.demo.exception;
 
-import java.io.Serial;
 
 /**
  * 4. 一个具体的“非受检”异常
@@ -9,7 +8,6 @@ import java.io.Serial;
  */
 public class InvalidOperationException extends MyProjectRuntimeException {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     public InvalidOperationException(String message) {

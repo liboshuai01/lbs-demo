@@ -1,8 +1,6 @@
 package cn.liboshuai.demo.exception;
 
 
-import java.io.Serial;
-
 /**
  * 2. 一个具体的“受检”异常
  * 继承自我们的基类 MyProjectException。
@@ -10,7 +8,6 @@ import java.io.Serial;
  */
 public class InvalidConfigurationException extends MyProjectException {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     public InvalidConfigurationException(String message) {

@@ -1,7 +1,5 @@
 package cn.liboshuai.demo.exception;
 
-import java.io.Serial;
-
 /**
  * 1. 自定义“受检”异常的基类
  * 类似于 Flink 的 FlinkException，用于所有我们项目中定义的、
@@ -9,7 +7,6 @@ import java.io.Serial;
  */
 public class MyProjectException extends Exception {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     public MyProjectException(String message) {

@@ -1,7 +1,5 @@
 package cn.liboshuai.demo.exception;
 
-import java.io.Serial;
-
 /**
  * 新增的异常类：服务执行异常
  * <p>
@@ -13,7 +11,6 @@ import java.io.Serial;
  */
 public class ServiceExecutionException extends MyProjectRuntimeException {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

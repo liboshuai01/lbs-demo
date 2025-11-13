@@ -1,7 +1,5 @@
 package cn.liboshuai.demo.exception;
 
-import java.io.Serial;
-
 /**
  * 3. 自定义“非受检”异常的基类 (运行时异常)
  * 类似于 Flink 的 FlinkRuntimeException。
@@ -10,7 +8,6 @@ import java.io.Serial;
  */
 public class MyProjectRuntimeException extends RuntimeException {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     public MyProjectRuntimeException(String message) {

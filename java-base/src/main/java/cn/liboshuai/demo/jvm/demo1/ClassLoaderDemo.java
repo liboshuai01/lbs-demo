@@ -3,7 +3,6 @@ package cn.liboshuai.demo.jvm.demo1;
 /**
  * 演示JVM类加载器和双亲委派模型
  * (更新版：增加了 PlatformClassLoader 的演示)
- *
  * 编译并运行:
  * 1. 保存文件为 ClassLoaderDemo.java
  * 2. javac ClassLoaderDemo.java
@@ -24,7 +23,7 @@ public class ClassLoaderDemo {
         // 在 Java 8 中, 这是 扩展类加载器 (ExtClassLoader)
         // 在 Java 9+ 中, 这是 平台类加载器 (PlatformClassLoader)
         ClassLoader platformClassLoader = appClassLoader.getParent();
-        System.out.println("\n平台类加载器 (PlatformClassLoader/ExtClassLoader): \n" + platformClassLoader);
+        System.out.println("\n扩展类加载器 (PlatformClassLoader/ExtClassLoader): \n" + platformClassLoader);
 
         // 3. 获取 平台/扩展类加载器 的父加载器
         // 这是 启动类加载器 (BootstrapClassLoader)
