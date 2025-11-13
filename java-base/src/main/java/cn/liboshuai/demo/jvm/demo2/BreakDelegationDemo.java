@@ -120,7 +120,7 @@ public class BreakDelegationDemo {
         System.out.println("[Main]: AppClassLoader 的搜索路径 (java.class.path):\n" +
                 System.getProperty("java.class.path"));
 
-        // 1. 定义我们的 "插件" 目录 (`com/example/MyTestClass.java`类文件存放的目录, 一定要为非`src/main/java`目录外)
+        // 1. 定义我们的 "插件" 目录 (`com/example/MyTestClass.java`类文件存放的目录, 一定要在上面`java.class.path`输出的目录列表之外)
         String customPath = "C:/Users/lbs/me/project/java-project/lbs-demo/java-base/temp_classes";
 
         // 2. 创建我们的自定义加载器
