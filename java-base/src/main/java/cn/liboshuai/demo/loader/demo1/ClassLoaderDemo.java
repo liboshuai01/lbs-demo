@@ -1,4 +1,4 @@
-package cn.liboshuai.demo.jvm.demo1;
+package cn.liboshuai.demo.loader.demo1;
 
 /**
  * 演示JVM类加载器和双亲委派模型

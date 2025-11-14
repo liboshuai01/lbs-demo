@@ -1,4 +1,4 @@
-package cn.liboshuai.demo.jvm.demo2;
+package cn.liboshuai.demo.loader.demo2;
 
 import java.io.*;
 
