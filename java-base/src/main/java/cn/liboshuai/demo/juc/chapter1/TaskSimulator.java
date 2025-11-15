@@ -1,5 +1,7 @@
 package cn.liboshuai.demo.juc.chapter1;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * 实战案例 1：模拟 Flink StreamTask 使用 volatile
  * * 演示 "一个线程写, 一个线程读" 的经典场景。
@@ -34,11 +36,14 @@ public class TaskSimulator {
                 counter++;
                 // 模拟正在处理数据...
                 // 我们在这里加一个小的 sleep 来减缓控制台输出速度
-                // if (counter % 1000000 == 0) {
-                //    System.out.println("任务正在运行, Cnt: " + counter);
-                // }
                 // 注意：在真实的 Flink 中, 这里是没有 sleep 的,
                 // 'running' 的检查会非常频繁。
+                try {
+                    TimeUnit.MILLISECONDS.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("任务正在运行, Cnt: " + counter);
             }
 
             System.out.println(Thread.currentThread().getName() + " 收到停止信号, 退出循环。");
@@ -72,7 +77,7 @@ public class TaskSimulator {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         // 5. "主线程" (Main Thread) 调用 stop() 方法,
