@@ -56,13 +56,13 @@ public class BoundedBufferSimulator {
                 // 2. 如果队列满了, 必须等待 "notFull" 条件
                 // ！！！必须使用 while 循环, 防止虚假唤醒！！！
                 while (buffer.size() == capacity) {
-                    log.info(Thread.currentThread().getName() + " [生产者]: 缓冲区已满! 等待消费者取走数据...");
+                    log.info(" [生产者]: 缓冲区已满! 等待消费者取走数据...");
                     notFull.await(); // 释放锁, 进入等待状态
                 }
 
                 // 3. 放入数据
                 buffer.add(data);
-                log.info(Thread.currentThread().getName() + " [生产者]: 放入数据 " + data + ", 当前大小: " + buffer.size());
+                log.info(" [生产者]: 放入数据 " + data + ", 当前大小: " + buffer.size());
 
                 // 4. 唤醒等待数据的消费者 (如果有的话)
                 // "嘿, 甚至有一个数据了, 那个因为空而等待的消费者可以醒醒了"
@@ -82,13 +82,13 @@ public class BoundedBufferSimulator {
                 // 2. 如果队列空了, 必须等待 "notEmpty" 条件
                 // 这直接对应 Flink 源码 InputChannel 中的 while(unprocessedBuffers.isEmpty()) wait();
                 while (buffer.isEmpty()) {
-                    log.info(Thread.currentThread().getName() + " [消费者]: 缓冲区为空! 等待上游数据...");
+                    log.info(" [消费者]: 缓冲区为空! 等待上游数据...");
                     notEmpty.await(); // 释放锁, 进入等待状态
                 }
 
                 // 3. 取出数据
                 T data = buffer.poll();
-                log.info(Thread.currentThread().getName() + " [消费者]: 取出数据 " + data + ", 当前大小: " + buffer.size());
+                log.info(" [消费者]: 取出数据 " + data + ", 当前大小: " + buffer.size());
 
                 // 4. 唤醒等待空间的生产者 (如果有的话)
                 // "嘿, 我取走了一个数据, 腾出了空间, 那个因为满而等待的生产者可以醒醒了"
