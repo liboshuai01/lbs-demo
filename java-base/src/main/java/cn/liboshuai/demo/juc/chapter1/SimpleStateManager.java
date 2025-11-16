@@ -29,7 +29,6 @@ public class SimpleStateManager {
     /**
      * ！！！使用 'synchronized' 保护 "写" 操作！！！
      * 这是一个 "Check-Then-Act" 复合操作, 必须是原子的。
-     * @param key
      */
     public synchronized void updateState(String key) {
         // 1. 检查 (Check)
@@ -47,8 +46,6 @@ public class SimpleStateManager {
     /**
      * ！！！使用 'synchronized' 保护 "读" 操作！！！
      * 保证读取时, 'updateState' 方法不会同时在修改 Map。
-     * @param key
-     * @return
      */
     public synchronized Integer getState(String key) {
         return stateMap.get(key);
