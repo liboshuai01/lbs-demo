@@ -41,7 +41,7 @@ public class SimpleStateManager {
             // 2. 行动 (Act)
             stateMap.put(key, oldValue + 1);
         }
-        // System.out.println(Thread.currentThread().getName() + " 更新了 " + key + ", new value=" + stateMap.get(key));
+        System.out.println(Thread.currentThread().getName() + " 更新了 " + key + ", new value=" + stateMap.get(key));
     }
 
     /**

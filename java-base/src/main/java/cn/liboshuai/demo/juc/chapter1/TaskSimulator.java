@@ -1,6 +1,7 @@
 package cn.liboshuai.demo.juc.chapter1;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 实战案例 1：模拟 Flink StreamTask 使用 volatile
@@ -24,7 +25,7 @@ public class TaskSimulator {
          */
         private volatile boolean running = true;
 
-        private long counter = 0;
+        private AtomicLong counter = new AtomicLong(0);
 
         @Override
         public void run() {
@@ -33,7 +34,6 @@ public class TaskSimulator {
             // 这是 "读" 线程
             // StreamTask 的主循环，模拟不断处理数据
             while (running) {
-                counter++;
                 // 模拟正在处理数据...
                 // 我们在这里加一个小的 sleep 来减缓控制台输出速度
                 // 注意：在真实的 Flink 中, 这里是没有 sleep 的,
@@ -43,11 +43,12 @@ public class TaskSimulator {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                System.out.println("任务正在运行, Cnt: " + counter);
+                long count = counter.incrementAndGet();
+                System.out.println("任务正在运行, Cnt: " + count);
             }
 
             System.out.println(Thread.currentThread().getName() + " 收到停止信号, 退出循环。");
-            System.out.println("总共处理了 " + counter + " 条数据。");
+            System.out.println("总共处理了 " + counter.get() + " 条数据。");
         }
 
         /**
@@ -60,7 +61,7 @@ public class TaskSimulator {
         }
 
         public long getCounter() {
-            return counter;
+            return counter.get();
         }
     }
 
