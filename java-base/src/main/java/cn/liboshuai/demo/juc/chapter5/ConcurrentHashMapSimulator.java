@@ -8,11 +8,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 实战案例 6：ConcurrentHashMap 的 "原子性陷阱"
- *
  * 目标：
  * 演示为什么 "get() + put()" 在 ConcurrentHashMap 中是线程不安全的 (非原子复合操作),
  * 以及如何使用 "compute()" 来正确地执行原子复合操作。
- *
  * 场景：
  * 模拟 Flink JobMaster 统计 FAILED 的 Task 数量。
  * 多个 RPC 线程并发地汇报 "task-failed" 事件。
@@ -26,7 +24,6 @@ public class ConcurrentHashMapSimulator {
     /**
      * ！！！ 1. 反面教材 (线程不安全) ！！！
      * "先检查, 再行动" (Check-Then-Act)
-     *
      * 竞争过程：
      * 1. 线程 A: get("job_12345") -> 得到 5
      * 2. 线程 B: get("job_12345") -> 得到 5
