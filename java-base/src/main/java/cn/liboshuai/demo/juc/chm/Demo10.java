@@ -25,8 +25,7 @@ import java.util.concurrent.TimeUnit;
  * Flink 源码启示:
  * - 在 Java 8+ 的代码中，应优先使用 mappingCount()，因为它返回 long，语义上更健壮。
  * - 绝不能依赖 size() == 0 来判断 Map 是否为空，应使用 isEmpty()。
- * - 绝不能依赖 size() 或 mappingCount()
- * 的值来进行线程同步或逻辑控制，因为它们在并发下是估算值。
+ * - 绝不能依赖 size() 或 mappingCount() 的值来进行线程同步或逻辑控制，因为它们在并发下是估算值。
  * (环境: JDK 1.8)
  */
 public class Demo10 {
