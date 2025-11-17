@@ -16,8 +16,7 @@ import java.util.concurrent.TimeUnit;
  * - (key, oldValue) -> null:     如果 key 存在，则从 Map 中删除该 key
  * compute 的行为:
  * - 如果 key 存在: remappingFunction 传入 (key, oldValue)，计算结果存入 Map (或删除)
- * - 如果 key 不存在: remappingFunction 传入 (key, null)，计算结果 (null
- * 除外) 存入 Map
+ * - 如果 key 不存在: remappingFunction 传入 (key, null)，计算结果 (null除外) 存入 Map
  * (环境: JDK 1.8)
  */
 public class Demo4 {
