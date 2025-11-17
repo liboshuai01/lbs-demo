@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * - 迭代器创建后，它保证至少会反映 Map 在迭代器创建时的状态。
  * - 它 "可能" (但不保证) 反映迭代器创建之后发生的修改。
  * - 它保证不会两次返回同一个元素。
- * 4. 迭代器的 remove() 方法会抛出 UnsupportedOperationException (不允许通过迭代器删除)。
+ * 4. (更正) 迭代器的 remove() 方法 "是支持的" 并且是 "线程安全的"。
  * (环境: JDK 1.8)
  */
 public class Demo8 {
@@ -82,20 +82,22 @@ public class Demo8 {
         System.out.println("--- (Hadoop 可能出现也可能不出现，Spark 可能被遍历到也可能不被遍历到) ---");
 
 
-        // --- 2. 迭代器不支持 remove() ---
-        System.out.println("\n--- 2. 迭代器不支持 remove() 操作 ---");
+        // --- 2. 迭代器 "支持" remove() ---
+        System.out.println("\n--- 2. 迭代器支持 remove() 操作 ---");
+
+        // 假设我们要安全地移除 "Kafka"
+        System.out.println("Map (remove 前): " + map);
         Iterator<String> keyIterator = map.keySet().iterator();
 
-        try {
-            if (keyIterator.hasNext()) {
-                String key = keyIterator.next();
-                System.out.println("获取一个 key: " + key);
-                // 尝试通过迭代器删除
+        while (keyIterator.hasNext()) {
+            String key = keyIterator.next();
+            if (key.equals("Kafka")) {
+                System.out.println("正在通过迭代器移除 'Kafka'...");
+                // 迭代器的 remove() 是线程安全的
                 keyIterator.remove();
             }
-        } catch (UnsupportedOperationException e) {
-            System.err.println("捕获到异常: " + e.getMessage());
-            System.out.println("结论: ConcurrentHashMap 的迭代器不支持 remove()。");
         }
+
+        System.out.println("Map (remove 后): " + map);
     }
 }
