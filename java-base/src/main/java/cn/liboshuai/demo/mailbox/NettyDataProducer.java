@@ -1,36 +1,46 @@
 package cn.liboshuai.demo.mailbox;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 模拟 Netty 网络层。
+ * 只负责疯狂往 InputGate 塞数据。
+ */
+@Slf4j
 public class NettyDataProducer extends Thread {
-
     private final MiniInputGate inputGate;
-
     private volatile boolean running = true;
 
     public NettyDataProducer(MiniInputGate inputGate) {
+        super("Netty-Thread");
         this.inputGate = inputGate;
     }
 
     @Override
     public void run() {
-        long count = 0;
         Random random = new Random();
+        int seq = 0;
         while (running) {
-            String data = "Record-" + (++count);
-            inputGate.pushData(data);
-            int sleepTime = random.nextInt(10) < 5 ? 2000 : 10;
             try {
-                TimeUnit.MILLISECONDS.sleep(sleepTime);
+                // 模拟网络抖动：大部分时候很快，偶尔卡顿
+                // 这能测试 Task 在"忙碌"和"挂起"状态之间的切换
+                int sleep = random.nextInt(100) < 5 ? 500 : 10;
+                TimeUnit.MILLISECONDS.sleep(sleep);
+
+                String data = "Record-" + (++seq);
+                inputGate.pushData(data);
+
             } catch (InterruptedException e) {
-                break;
+                Thread.currentThread().interrupt();
             }
         }
     }
 
     public void shutdown() {
-        this.running = false;
+        running = false;
         this.interrupt();
     }
 }
