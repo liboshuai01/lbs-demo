@@ -4,27 +4,24 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 任务基类。
- * 修改点：getControlMailboxExecutor 使用最高优先级 (MIN_PRIORITY)。
+ * 修改点：明确区分 Control Flow (优先级0) 和 Data Flow (优先级1) 的 Executor 配置.
  */
 @Slf4j
 public abstract class StreamTask implements MailboxDefaultAction {
 
     protected final TaskMailbox mailbox;
     protected final MailboxProcessor mailboxProcessor;
-    protected final MailboxExecutor mainMailboxExecutor;
+    protected final MailboxExecutor defaultMailboxExecutor;
+    protected final MailboxExecutor minDefaultMailboxExecutor;
 
     public StreamTask() {
-        // 1. 获取当前线程作为主线程
         Thread currentThread = Thread.currentThread();
-
-        // 2. 初始化邮箱 (使用新的 TaskMailboxImpl)
         this.mailbox = new TaskMailboxImpl(currentThread);
-
-        // 3. 初始化处理器
         this.mailboxProcessor = new MailboxProcessor(this, mailbox);
-
-        // 4. 获取主线程 Executor
-        this.mainMailboxExecutor = mailboxProcessor.getMainExecutor();
+        // 主执行器 (用于 task 内部自提交) 跟随 Processor 的默认优先级 (1)
+        this.defaultMailboxExecutor = mailboxProcessor.getDefaultMailboxExecutor();
+        // 系统执行器 (用于Checkpoint 等系统任务) 优先级为0
+        this.minDefaultMailboxExecutor = mailboxProcessor.getMinDefaultMailboxExecutor();
     }
 
     /**
@@ -53,7 +50,7 @@ public abstract class StreamTask implements MailboxDefaultAction {
      * 修改点：使用 MailboxProcessor.MIN_PRIORITY (0)
      */
     public MailboxExecutor getControlMailboxExecutor() {
-        return new MailboxExecutorImpl(mailbox, MailboxProcessor.MIN_PRIORITY);
+        return this.minDefaultMailboxExecutor;
     }
 
     // 子类实现具体的处理逻辑
