@@ -56,8 +56,6 @@ public class MailboxProcessor implements MailboxDefaultAction.Controller {
             } else {
                 // 阶段3: 如果没数据了 (Suspended)
                 // 我们阻塞等待 **任何** 优先级的邮件 (通常是 Resume 信号, 可能是 0 也可能是 1)
-                // 注意: 这里我们使用 MIN_PRIORITY, 意味着只要有 >= 的邮件都可以唤醒.
-                // 实际上, 如果系统挂起, 我们愿意接受任何邮件来打破僵局
                 Mail mail = mailbox.take(DEFAULT_PRIORITY);
                 mail.run();
             }
