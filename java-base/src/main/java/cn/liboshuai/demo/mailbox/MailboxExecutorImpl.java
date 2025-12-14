@@ -1,6 +1,6 @@
 package cn.liboshuai.demo.mailbox;
 
-import cn.liboshuai.flink.util.ThrowingRunnable;
+import cn.liboshuai.demo.util.ThrowingRunnable;
 
 public class MailboxExecutorImpl implements MailboxExecutor {
 
