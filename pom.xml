@@ -19,11 +19,11 @@
         <module>springboot-sharding</module>
         <module>springboot-mybatisplus</module>
         <module>springboot-mybatisplus-dynamic</module>
-        <module>hexo2wiki-tool</module>
         <module>flink-rpc</module>
         <module>mini-flink</module>
         <module>spring-src-learn</module>
         <module>spi-demo</module>
         <module>java-base</module>
+        <module>blog-tool</module>
     </modules>
 </project>
