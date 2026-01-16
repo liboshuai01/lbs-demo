@@ -43,7 +43,7 @@ public class FlinkWordCountDemo {
         }
 
         // 3. 设置 flink 配置
-        setConfig(env, params);
+//        setConfig(env, params);
 
         // 4. 构建并执行 Flink 作业
         buildAndExecuteJob(env, params);
