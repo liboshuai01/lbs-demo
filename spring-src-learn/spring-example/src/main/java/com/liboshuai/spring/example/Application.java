@@ -11,7 +11,7 @@ public class Application {
 
     public static void main(String[] args) {
         // 基于AppConfig配置类，初始化Spring注解驱动的applicationContext
-        AnnotationConfigApplicatiocnContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
         OrderService orderService = (OrderService) context.getBean("OrderService");
         orderService.test();
     }
